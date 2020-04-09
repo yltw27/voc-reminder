@@ -8,7 +8,7 @@
   },
   "scripts": {
     "start": "node src/index.js",
-    "dev": "env-cmd -f ./config/dev.env nodemon src/index.js",
+    "dev": "env-cmd -f ./config/dev.env nodemon src/app.js",
     "test": "env-cmd -f ./config/test.env jest --watch --runInBandw"
   },
   "repository": {
@@ -23,9 +23,12 @@
   "homepage": "https://github.com/friday27/voc-reminder#readme",
   "dependencies": {
     "bcrypt": "^4.0.1",
+    "body-parser": "^1.19.0",
+    "dotenv": "^8.2.0",
     "express": "^4.17.1",
     "jest": "^25.3.0",
     "jsonwebtoken": "^8.5.1",
+    "linebot": "^1.5.3",
     "mongoose": "^5.9.7",
     "supertest": "^4.0.2",
     "validator": "^13.0.0"

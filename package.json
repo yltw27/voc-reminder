@@ -1,7 +1,7 @@
 {
-  "name": "vanilla-nodejs-project",
+  "name": "voc-reminder",
   "version": "1.0.0",
-  "description": "1. `git clone https://github.com/friday27/vanilla-nodejs-project.git` 2. `git remote set-url origin ...`",
+  "description": "",
   "main": "index.js",
   "directories": {
     "test": "tests"
@@ -9,18 +9,18 @@
   "scripts": {
     "start": "node src/index.js",
     "dev": "env-cmd -f ./config/dev.env nodemon src/index.js",
-    "test": "env-cmd -f ./config/test.env jest --watch --runInBand"
+    "test": "env-cmd -f ./config/test.env jest --watch --runInBandw"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/friday27/vanilla-nodejs-project.git"
+    "url": "git+https://github.com/friday27/voc-reminder.git"
   },
   "author": "",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/friday27/vanilla-nodejs-project/issues"
+    "url": "https://github.com/friday27/voc-reminder/issues"
   },
-  "homepage": "https://github.com/friday27/vanilla-nodejs-project#readme",
+  "homepage": "https://github.com/friday27/voc-reminder#readme",
   "dependencies": {
     "bcrypt": "^4.0.1",
     "express": "^4.17.1",
@@ -33,5 +33,6 @@
   "devDependencies": {
     "env-cmd": "^10.1.0",
     "nodemon": "^2.0.3"
-  }
+  },
+  "keywords": []
 }

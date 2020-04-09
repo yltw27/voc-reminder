@@ -8,12 +8,23 @@
 
 4. `npm install`
 
-5. Update these files if needed.
+5. [Install MongoDB](https://docs.mongodb.com/manual/administration/install-community/)
+
+6. Update these files if needed.
 
   * package.json
   * config/dev.env
   * config/test.env
 
-6. Run `npm run dev` and `npm run test` to test.
+7. Run below commands to test.
+
+        // Start MongoDB
+        ~/mongodb/bin/mongod
+
+        // Start server in dev mode
+        npm run dev
+
+        // Run tests
+        npm run test
 
 Happy Coding ~

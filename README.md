@@ -1,30 +1,48 @@
-# Vanilla NodeJS Project
+# Voc Reminder
 
-1. `git clone https://github.com/friday27/vanilla-nodejs-project.git`
+Build up a service to let users create vocabulary list and get notify through Line ChatBot based on [spaced repetition](https://en.wikipedia.org/wiki/Spaced_repetition).
 
-2. Use `git remote set-url origin ...` to change the upstream git repo.
+## TODOs
 
-3. `npm init -y`
+* Line ChatBot tutorials
+  * Rich Menu
+* Spaced repetition algorithm
+* Heroku and PostgreSQL
+* Flows
+* Test Cases
 
-4. `npm install`
+## Flows (Draw it!)
 
-5. [Install MongoDB](https://docs.mongodb.com/manual/administration/install-community/)
+### Create Voc
 
-6. Update these files if needed.
+* welcome message
+  * choose 'add'
+    1. show today's list
+    2. start list creating (Vocabulary: English, Explanation: Chinese)
+    3. end when the number >= 15
+  * exit
 
-  * package.json
-  * config/dev.env
-  * config/test.env
+### Quiz
 
-7. Run below commands to test.
+* welcome message
+  * choose 'quiz'
+    1. show the number to complete
+    2. show English words one by one (with number) and save user's inputs
+    3. show user's score and correct answers
+  * exit
 
-        // Start MongoDB
-        ~/mongodb/bin/mongod
+### Reminder
 
-        // Start server in dev mode
-        npm run dev
+If the user doesn't take quiz today, sent a warm reminder.
 
-        // Run tests
-        npm run test
+### List (Format!)
 
-Happy Coding ~
+* Show all voc that user is not 100% familiar with (sort by familarity).
+* Show all vocabulary in a specific period (e.g. this month)
+* After users check voc lists, they can remove some by typing voc or number.
+
+### Remove
+
+### More
+
+* Automatically archive vocabulary which is created X (?) ago with 100% familarity.

@@ -1,8 +1,9 @@
 // 引用 line bot SDK
-let linebot = require('linebot');
+const linebot = require('linebot');
+const express = require('express');
 
 // 初始化 line bot 需要的資訊，在 Heroku 上的設定的 Config Vars，可參考 Step2
-let bot = linebot({
+const bot = linebot({
   channelId: process.env.LINE_CHANNEL_ID,
   channelSecret: process.env.LINE_CHANNEL_SECRET,
   channelAccessToken: process.env.LINE_CHANNEL_ACCESS_TOKEN

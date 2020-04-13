@@ -25,14 +25,14 @@ const bot = linebot({
 });
 
 bot.on('message', async function(event) {
-  let msg = `Hello! ${linebot.getUserProfile(event.source.userId)} 已將 ${event.message.text} 存到資料庫\n`;
+  // let msg = `Hello! ${linebot.getUserProfile(event.source.userId)} 已將 ${event.message.text} 存到資料庫\n`;
+  let msg = `已將 ${event.message.text} 存到資料庫`;
   
-  console.log(`INSERT INTO voc (voc, user_id) VALUES (${event.message.text}, ${linebot.getUserProfile(event.source.userId)})`);
-
   try {
     const client = await pool.connect();
 
-    await client.query(`INSERT INTO voc (voc, user_id) VALUES (${event.message.text}, ${parseString(linebot.getUserProfile(event.source.userId))})`);   
+    // await client.query(`INSERT INTO voc (voc, user_id) VALUES ('${event.message.text}', ${parseString(linebot.getUserProfile(event.source.userId))})`);   
+    await client.query(`INSERT INTO voc (voc, user_id) VALUES ('${event.message.text}', 100)`);
 
     const result = await client.query('SELECT * FROM voc');
     // const results = { 'results': (result) ? result.rows : null};

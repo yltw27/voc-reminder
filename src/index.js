@@ -2,13 +2,13 @@ require('dotenv').config()
 const linebot = require('linebot');
 const express = require('express');
 const bodyParser = require('body-parser');
-const db = require('./src/db/postgre');
+const db = require('./db/postgre');
 
 // Postgre Config
 const Pool = require('pg').Pool;
 
 const pool = new Pool({
-  connectionString: DATABASE_URL,
+  connectionString: process.env.DATABASE_URL,
   ssl: true
   // user: process.env.POSTGRE_USER,
   // host: process.env.POSTGRE_HOST,

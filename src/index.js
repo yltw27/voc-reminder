@@ -36,11 +36,11 @@ bot.on('message', async function(event) {
     event.reply(msg);
     console.log(msg);
 
-    const client = await pool.connect();
-    const result = await client.query('SELECT * FROM voc');
-    // await client.query(`INSERT INTO voc (voc, user_id) VALUES ('${event.message.text}', 100)`);
-    console.log(result);
-    client.release();
+    // const client = await pool.connect();
+    // const result = await client.query('SELECT * FROM voc');
+    // // await client.query(`INSERT INTO voc (voc, user_id) VALUES ('${event.message.text}', 100)`);
+    // console.log(result);
+    // client.release();
   } catch (e) {
     console.log(`Error: ${e}`);
   }

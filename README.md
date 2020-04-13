@@ -4,6 +4,7 @@ Build up a service to let users create vocabulary list and get notify through Li
 
 ## TODOs
 
+* How to test locally
 * PostgreSQL - CRUD
   * Save inputs into PostgreSQL on Heroku
   * Update data by text commands (測試/刪除/..)

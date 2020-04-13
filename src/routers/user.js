@@ -1,7 +1,4 @@
-const express = require('express');
-const router = new express.Router();
-const auth = require('../middleware/auth');
-const User = require('../models/user');
+const pool = require('../db.postgre');
 
 router.post('/users', async (req, res) => {
   const user = new User(req.body);
@@ -44,6 +41,15 @@ router.post('/users/logoutAll', auth, async (req, res) => {
   } catch (e) {
     res.status(500).send();
   }
+});
+
+router.get('/users', (req, res) => {
+  pool.query('SELECT * FROM users ORDER BY id ASC', (error, results) => {
+    if (error) {
+      throw error;
+    }
+    response.status(200).json(results.rows);
+  })
 });
 
 router.get('/users/me', auth, async(req, res) => {

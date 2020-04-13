@@ -39,3 +39,4 @@ Build up a service to let users create vocabulary list and get notify through Li
 * [Problem: Couldn't connect to local server](https://stackoverflow.com/questions/13573204/psql-could-not-connect-to-server-no-such-file-or-directory-mac-os-x)
 * [Setting up a RESTful API with Node.js and PostgreSQL](https://blog.logrocket.com/setting-up-a-restful-api-with-node-js-and-postgresql-d96d6fc892d8/)
 * [Heroku: Provision a database](https://devcenter.heroku.com/articles/getting-started-with-nodejs#provision-a-database)
+* [使用Postman測試LINE Bot訊息推送](https://dotblogs.com.tw/tingi/2019/04/14/172942)

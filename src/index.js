@@ -1,32 +1,33 @@
-require('dotenv').config()
+// require('dotenv').config()
 const linebot = require('linebot');
 const express = require('express');
 const bodyParser = require('body-parser');
-const db = require('./db/postgre');
+// const db = require('./db/postgre');
 
-// Postgre Config
-const Pool = require('pg').Pool;
+// // Postgre Config
+// const Pool = require('pg').Pool;
 
-const pool = new Pool({
-  connectionString: process.env.DATABASE_URL,
-  ssl: true
-  // user: process.env.POSTGRE_USER,
-  // host: process.env.POSTGRE_HOST,
-  // database: process.env.POSTGRE_DB,
-  // password: process.env.POSTGRE_PASSWORD,
-  // port: process.env.POSTGRE_PORT,
-})
-
+// const pool = new Pool({
+//   connectionString: process.env.DATABASE_URL,
+//   ssl: true
+//   // user: process.env.POSTGRE_USER,
+//   // host: process.env.POSTGRE_HOST,
+//   // database: process.env.POSTGRE_DB,
+//   // password: process.env.POSTGRE_PASSWORD,
+//   // port: process.env.POSTGRE_PORT,
+// })
 
 const bot = linebot({
   channelId: process.env.LINE_CHANNEL_ID,
   channelSecret: process.env.LINE_CHANNEL_SECRET,
-  channelAccessToken: process.env.LINE_CHANNEL_ACCESS_TOKEN
+  channelAccessToken: process.env.LINE_CHANNEL_ACCESS_TOKEN,
+  verify: false
 });
 
 bot.on('message', async function(event) {
   // let msg = `Hello! ${linebot.getUserProfile(event.source.userId)} 已將 ${event.message.text} 存到資料庫\n`;
-  let msg = `已將 ${event.message.text} 存到資料庫`;
+  // let msg = `已將 ${event.message.text} 存到資料庫`;
+  let msg = event.message.text;
   
   try {
     // const results = { 'results': (result) ? result.rows : null};

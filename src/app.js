@@ -18,7 +18,7 @@ const app = Express();
 const port = process.env.PORT;
 
 // for line webhook usage
-app.post('/linewebhook', linebotParser);
+app.post('/webhook', linebotParser);
 
 app.use(BodyParser.urlencoded({ extended: true }));
 app.use(BodyParser.json());

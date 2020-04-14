@@ -28,18 +28,20 @@ bot.on('message', async function(event) {
   let msg = `已將 ${event.message.text} 存到資料庫`;
   
   try {
-    // const results = { 'results': (result) ? result.rows : null};
-    // res.render('pages/db', results );
-    // msg += result? result.rows: null;
-
     event.reply(msg);
-    // console.log(msg);
+    console.log(`${parseString(bot.getUserProfile(event.source.userId))}: ${event.message.text}`);
 
-    const client = await pool.connect();
-    await client.query(`INSERT INTO voc (voc, user_id) VALUES ('${event.message.text}', 100)`);
+    await pool.query(`INSERT INTO voc (voc, user_id) VALUES ('${event.message.text}', 100)`, (err, res) => {
+      console.log(err, res);
+      pool.end();
+    })
+
+    // const client = await pool.connect();
+    // await client.query(`INSERT INTO voc (voc, user_id) VALUES ('${event.message.text}', 100)`);
     // const result = await client.query('SELECT * FROM voc');
     // console.log(result);
-    client.release();
+    // client.release();
+
   } catch (e) {
     console.log(`Error: ${e}`);
   }

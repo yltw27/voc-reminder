@@ -24,7 +24,7 @@ const bot = linebot({
 });
 
 bot.on('message', async function(event) {
-  let msg = `Hello! ${linebot.getUserProfile(event.source.userId)} 已將 ${event.message.text} 存到資料庫\n`;
+  let msg = `Hello! ${bot.getUserProfile(event.source.userId)} 已將 ${event.message.text} 存到資料庫\n`;
   // let msg = `已將 ${event.message.text} 存到資料庫`;
   // let msg = event.message.text;
   

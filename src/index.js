@@ -37,13 +37,16 @@ bot.on('message', async function(event) {
     // console.log(`${parseString(bot.getUserProfile(event.source.userId))}: ${event.message.text}`);
 
     client.connect();
-    client.query(`INSERT INTO voc (voc, user_id) VALUES ('${event.message.text}', 100);`, (err, res) => {
-      if (err) {
-        console.log(err);
-      }
-      for (let row of res.rows) {
-        console.log(JSON.stringify(row));
-      }
+    await client.query(`INSERT INTO voc (voc, user_id) VALUES ('${event.message.text}', 100);`, (err, res) => {
+      console.log('Error: '+err);
+      console.log('Result: '+res);
+      // if (err) {
+      //   console.log(err);
+      //   throw err;
+      // }
+      // for (let row of res.rows) {
+      //   console.log(JSON.stringify(row));
+      // }
       client.end();
     });
 

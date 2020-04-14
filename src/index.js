@@ -29,7 +29,7 @@ bot.on('message', async function(event) {
   
   try {
     event.reply(msg);
-    console.log(`${parseString(bot.getUserProfile(event.source.userId))}: ${event.message.text}`);
+    // console.log(`${parseString(bot.getUserProfile(event.source.userId))}: ${event.message.text}`);
 
     await pool.query(`INSERT INTO voc (voc, user_id) VALUES ('${event.message.text}', 100)`, (err, res) => {
       console.log(err, res);

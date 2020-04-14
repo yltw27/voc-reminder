@@ -11,15 +11,19 @@ const client = new Client({
   ssl: true,
 });
 
-// const pool = new Pool({
-//   connectionString: process.env.DATABASE_URL,
-//   ssl: true
-//   // user: process.env.POSTGRE_USER,
-//   // host: process.env.POSTGRE_HOST,
-//   // database: process.env.POSTGRE_DB,
-//   // password: process.env.POSTGRE_PASSWORD,
-//   // port: process.env.POSTGRE_PORT,
-// })
+const saveToDb = async function(text, userId) {
+  client.connect();
+  try {
+    await client.query(`INSERT INTO voc (voc, user_id) VALUES ('${text}', ${userId});`);
+    const res = await client.query('SELECT * FROM voc;');
+    for (let row of res.rows) {
+      console.log(JSON.stringify(row));
+    }
+  } catch (e) {
+    console.log(e);
+  }
+  client.end();
+};
 
 const bot = linebot({
   channelId: process.env.LINE_CHANNEL_ID,
@@ -35,26 +39,7 @@ bot.on('message', async function(event) {
   try {
     event.reply(msg);
     // console.log(`${parseString(bot.getUserProfile(event.source.userId))}: ${event.message.text}`);
-
-    client.connect();
-    await client.query(`INSERT INTO voc (voc, user_id) VALUES ('${event.message.text}', 100);`, (err, res) => {
-      console.log('Error: '+err);
-      console.log('Result: '+res);
-      // if (err) {
-      //   console.log(err);
-      //   throw err;
-      // }
-      // for (let row of res.rows) {
-      //   console.log(JSON.stringify(row));
-      // }
-      client.end();
-    });
-
-    // const client = await pool.connect();
-    // await client.query(`INSERT INTO voc (voc, user_id) VALUES ('${event.message.text}', 100)`);
-    // const result = await client.query('SELECT * FROM voc');
-    // console.log(result);
-    // client.release();
+    await saveToDb(event.message.text, 99);
 
   } catch (e) {
     console.log(`Error: ${e}`);
@@ -74,6 +59,11 @@ app.use(
 const linebotParser = bot.parser();
 
 app.post('/webhook', linebotParser);
+
+app.get('/', (req, res) => {
+  saveToDb('hello', '100');
+  res.send('ok');
+});
 
 app.listen(port, function() {
   console.log('Server is up! Listening on port: ', port);

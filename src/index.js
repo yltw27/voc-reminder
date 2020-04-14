@@ -4,17 +4,22 @@ const bodyParser = require('body-parser');
 // const db = require('./db/postgre');
 
 // Postgre Config
-const Pool = require('pg').Pool;
+const { Client } = require('pg');
 
-const pool = new Pool({
+const client = new Client({
   connectionString: process.env.DATABASE_URL,
-  ssl: true
-  // user: process.env.POSTGRE_USER,
-  // host: process.env.POSTGRE_HOST,
-  // database: process.env.POSTGRE_DB,
-  // password: process.env.POSTGRE_PASSWORD,
-  // port: process.env.POSTGRE_PORT,
-})
+  ssl: true,
+});
+
+// const pool = new Pool({
+//   connectionString: process.env.DATABASE_URL,
+//   ssl: true
+//   // user: process.env.POSTGRE_USER,
+//   // host: process.env.POSTGRE_HOST,
+//   // database: process.env.POSTGRE_DB,
+//   // password: process.env.POSTGRE_PASSWORD,
+//   // port: process.env.POSTGRE_PORT,
+// })
 
 const bot = linebot({
   channelId: process.env.LINE_CHANNEL_ID,
@@ -31,10 +36,16 @@ bot.on('message', async function(event) {
     event.reply(msg);
     // console.log(`${parseString(bot.getUserProfile(event.source.userId))}: ${event.message.text}`);
 
-    await pool.query(`INSERT INTO voc (voc, user_id) VALUES ('${event.message.text}', 100)`, (err, res) => {
-      console.log(err, res);
-      pool.end();
-    })
+    client.connect();
+    client.query(`INSERT INTO voc (voc, user_id) VALUES ('${event.message.text}', 100);`, (err, res) => {
+      if (err) {
+        console.log(err);
+      }
+      for (let row of res.rows) {
+        console.log(JSON.stringify(row));
+      }
+      client.end();
+    });
 
     // const client = await pool.connect();
     // await client.query(`INSERT INTO voc (voc, user_id) VALUES ('${event.message.text}', 100)`);

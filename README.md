@@ -4,30 +4,48 @@ Build up a service to let users create vocabulary list and get notify through Li
 
 ## TODOs
 
-* How to test heroku-postgres locally
 * PostgreSQL - CRUD
-  * Save inputs into PostgreSQL on Heroku
-  * Update data by text commands (測試/刪除/..)
-  
-  1. Save inputs into Postgre database on Heroku
-      * userId (String)
-      * text (String)
-      * active (Boolean)
-      * familarity (Number)
-      * createdAt (Date)
-      * updatedAt (Date)
-  2. Show voc list
-  3. Update words
-  4. Delete words
-  5. Next
-      * Test
-      * Reminder (based on spaced repetition)
-      * Automatically archive vocabulary which is created X (?) ago with 100% familarity.
+  * save words [done]
+  * Show voc list [done]
+  * Delete words [done]
+  * Update words
+  * Save inputs into Postgre database on Heroku -> flow
+    * Check daily limit (15 words?) before insertion
+  * Pretty show
+  * Next
+    * Test
+    * Reminder (based on spaced repetition)
+    * Automatically archive vocabulary which is created X (?) ago with 100% familarity.
 
 * [Spaced repetition algorithm](https://zh.wikipedia.org/wiki/%E9%97%B4%E9%9A%94%E9%87%8D%E5%A4%8D)
 * Test Cases
 * LineBot Rich Menu
 * Logo
+
+## PostgreSQL
+
+* Login `heroku pg:psql`
+
+* Create table
+
+      CREATE TABLE voc (
+        id serial NOT NULL PRIMARY KEY,
+        user_id VARCHAR(80) NOT NULL,
+        word VARCHAR(80) NOT NULL,
+        annotation VARCHAR(80),
+        familarity INT DEFAULT 0,
+        active BOOLEAN DEFAULT TRUE,
+        created_at TIMESTAMPTZ DEFAULT NOW(),
+        updated_at TIMESTAMPTZ DEFAULT NOW(),
+        unique (user_id, word)
+      );
+
+## Test Changes Locally
+
+1. Start ngrok `ngrok http 3000` (Change 3000 to your port)
+2. Update webhook URL on Line Messaging API page to https://xxxxxx.ngrok.io/yourWebhookName
+3. `npm run dev`
+4. Test your change via Line account
 
 ## References
 
@@ -39,6 +57,7 @@ Build up a service to let users create vocabulary list and get notify through Li
 
 * To solve self certificate problem, uninstall pq module and reinstall it with `npm install pq@7`
 * [Problem: Couldn't connect to local server](https://stackoverflow.com/questions/13573204/psql-could-not-connect-to-server-no-such-file-or-directory-mac-os-x)
+
 * [Setting up a RESTful API with Node.js and PostgreSQL](https://blog.logrocket.com/setting-up-a-restful-api-with-node-js-and-postgresql-d96d6fc892d8/)
 * [Heroku: Provision a database](https://devcenter.heroku.com/articles/getting-started-with-nodejs#provision-a-database)
-* [使用Postman測試LINE Bot訊息推送](https://dotblogs.com.tw/tingi/2019/04/14/172942)
+* [node-postgres](https://node-postgres.com/)

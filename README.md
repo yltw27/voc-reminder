@@ -8,14 +8,12 @@ Build up a service to let users create vocabulary list and get notify through Li
   * save words [done]
   * Show voc list [done]
   * Delete words [done]
-  * Update words
-  * Save inputs into Postgre database on Heroku -> flow
-    * Check daily limit (15 words?) before insertion
-  * Pretty show
-  * Next
-    * Test
-    * Reminder (based on spaced repetition)
-    * Automatically archive vocabulary which is created X (?) ago with 100% familarity.
+  * Update words [done]
+  * Check daily limit (15 words?) before insertion [done]
+  * Pretty show [done]
+  * Reminder (based on spaced repetition)
+  * Test
+  * Automatically archive vocabulary which is created X (?) ago with 100% familarity.
 
 * [Spaced repetition algorithm](https://zh.wikipedia.org/wiki/%E9%97%B4%E9%9A%94%E9%87%8D%E5%A4%8D)
 * Test Cases
@@ -38,6 +36,14 @@ Build up a service to let users create vocabulary list and get notify through Li
         created_at TIMESTAMPTZ DEFAULT NOW(),
         updated_at TIMESTAMPTZ DEFAULT NOW(),
         unique (user_id, word)
+      );
+
+      CREATE TABLE status (
+        user_id VARCHAR(80) NOT NULL PRIMARY KEY,
+        status VARCHAR(30) DEFAULT NULL,
+        num_words INT DEFAULT 0,
+        score INT DEFAULT 0,
+        unique (user_id)
       );
 
 ## Test Changes Locally

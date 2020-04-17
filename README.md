@@ -12,15 +12,13 @@ Build up a service to let users create vocabulary list and get notify through Li
   * Update words: word/annotation [done]
   * Check daily limit (15 words?) before insertion [done]
   * Pretty show [done]
-  * Issues
-    * update after 15 words added
-  * Reminder (based on spaced repetition)
-    * [Spaced repetition algorithm](https://zh.wikipedia.org/wiki/%E9%97%B4%E9%9A%94%E9%87%8D%E5%A4%8D)
-  * Test flow
-  * Automatically archive vocabulary which is created X (?) ago with 100% familarity.
+  
+  * Review (based on spaced repetition)
 * LineBot Rich Menu
 * Test Cases (Mocha)
 * How-to blog
+* Limit the number of show?
+* Voc Testing flow
 
 ## PostgreSQL
 
@@ -33,19 +31,10 @@ Build up a service to let users create vocabulary list and get notify through Li
         user_id VARCHAR(80) NOT NULL,
         word VARCHAR(80) NOT NULL,
         annotation VARCHAR(80),
-        familarity INT DEFAULT 0,
-        active BOOLEAN DEFAULT TRUE,
+        level INT DEFAULT 1,
         created_at TIMESTAMPTZ DEFAULT NOW(),
         updated_at TIMESTAMPTZ DEFAULT NOW(),
         unique (user_id, word)
-      );
-
-      CREATE TABLE status (
-        user_id VARCHAR(80) NOT NULL PRIMARY KEY,
-        status VARCHAR(30) DEFAULT NULL,
-        num_words INT DEFAULT 0,
-        score INT DEFAULT 0,
-        unique (user_id)
       );
 
 ## Test Changes Locally
@@ -69,3 +58,7 @@ Build up a service to let users create vocabulary list and get notify through Li
 * [Setting up a RESTful API with Node.js and PostgreSQL](https://blog.logrocket.com/setting-up-a-restful-api-with-node-js-and-postgresql-d96d6fc892d8/)
 * [Heroku: Provision a database](https://devcenter.heroku.com/articles/getting-started-with-nodejs#provision-a-database)
 * [node-postgres](https://node-postgres.com/)
+
+### Spaced Repetition
+
+* [Spaced repetition algorithm](https://zh.wikipedia.org/wiki/%E9%97%B4%E9%9A%94%E9%87%8D%E5%A4%8D)

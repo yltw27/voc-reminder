@@ -1,7 +1,7 @@
 const linebot = require('linebot');
 const express = require('express');
 const bodyParser = require('body-parser');
-const {addWord, updateWord, showWords, deleteWord} = require('./db/postgres');
+const {addWord, updateWord, showWords, deleteWord, reviewWords} = require('./db/postgres');
 
 const bot = linebot({
   channelId: process.env.LINE_CHANNEL_ID,
@@ -18,6 +18,8 @@ bot.on('message', function(event) {
     deleteWord(userId, userMsg.split('//')[1].trim(), event);
   } else if (userMsg.toLowerCase() === 'show') {
     showWords(userId, event);
+  } else if (userMsg.toLowerCase() === 'review') {
+    reviewWords(userId, event);
   } else if (userMsg.includes('+')) {
     const pair = userMsg.replace('+', '').split('/');
     addWord(userId, pair[0].trim(), pair[1].trim(), event);

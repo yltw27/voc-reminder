@@ -41,7 +41,8 @@ const addWord = function (userId, word, annotation, event) {
       query(`INSERT INTO voc (user_id, word, annotation) 
              VALUES ('${userId}', '${word}', '${annotation}') 
              ON CONFLICT (user_id, word) 
-             DO UPDATE SET annotation = '${annotation}'`, (err, res) => {
+             DO UPDATE SET annotation = '${annotation}',
+                           updated_at = NOW();`, (err, res) => {
         if (err) {
           console.log(err);
           event.reply(errMsg);
@@ -65,7 +66,8 @@ const updateWord = function(userId, word, annotation, event) {
       event.reply(`${word} 不在你的單字本中喔`);
     } else {
       query(`UPDATE voc
-             SET annotation = '${annotation}'
+             SET annotation = '${annotation}',
+                 updated_at = NOW()
              WHERE word = '${word}'
              AND user_id = '${userId}';`, (err, res) => {
         if (err) {
@@ -79,10 +81,10 @@ const updateWord = function(userId, word, annotation, event) {
 };
 
 const showWords = function (userId, event) {
-  query(`SELECT word, annotation, familarity
+  query(`SELECT word, annotation
          FROM voc
          WHERE user_id = '${userId}'
-         ORDER BY familarity ASC;`, (err, res) => {
+         ORDER BY level ASC, updated_at ASC;`, (err, res) => {
     if (err) {
       console.log(err);
       event.reply(errMsg);
@@ -93,7 +95,7 @@ const showWords = function (userId, event) {
     } else {
       let msg = '';
       for (let i in res) {
-        msg += `${res[i].word}\n${res[i].annotation}, ${res[i].familarity}\n--\n`;
+        msg += `${res[i].word}\n${res[i].annotation}\n--\n`;
       }
       event.reply(msg);
     }
@@ -112,12 +114,54 @@ const deleteWord = function (userId, word, event) {
   });
 };
 
+const words = function (rows) {
+
+};
+
+const reviewWords = function (userId, event) {
+  // 1. Save user's top 25 words into a temp table
+  query(`CREATE TABLE review_${userId} AS
+           SELECT voc.word, voc.annotation, voc.level
+           FROM voc
+           WHERE user_id = '${userId}'
+           ORDER BY level ASC, updated_at ASC
+           LIMIT 25;`, (err, res) => {
+    if (err) {
+      console.log(err);
+      event.reply(errMsg);
+    }
+    query(`ALTER TABLE review_${userId}
+           ADD COLUMN correct INT DEFAULT 0;`, (err, res) => {
+      if (err) {
+        console.log(err);
+        event.reply(errMsg);
+      }
+    });
+
+    // Show table
+    query(`SELECT * FROM review_${userId}`, (err, res) => {
+      console.log(err, res);
+    })
+
+    // get user's answers and update temp table (correct and level)
+
+    // send score back
+
+    // Drop temp table
+    // query(`DROP TABLE review_${userId};`, (err, res) => {
+    //   console.log(err, res);
+    // });
+  });  
+
+  
+};
 
 module.exports = {
   addWord,
   updateWord,
   showWords,
-  deleteWord
+  deleteWord,
+  reviewWords
   // query: (queryString, callback) => {
   //   const start = Date.now();
   //   return pool.query(queryString, (err, res) => {

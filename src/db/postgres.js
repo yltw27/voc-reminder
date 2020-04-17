@@ -24,7 +24,7 @@ const query = function(queryString, callback) {
 //   console.log(err, res);
 // });
 
-const updateWord = function (userId, word, annotation, event) {
+const addWord = function (userId, word, annotation, event) {
   // Check if daily created words > 15
   query(`SELECT count(1) 
          FROM voc
@@ -47,6 +47,32 @@ const updateWord = function (userId, word, annotation, event) {
           event.reply(errMsg);
         }
         event.reply(`已將 ${word} (${annotation}) 存到資料庫`);
+      });
+    }
+  });
+};
+
+const updateWord = function(userId, word, annotation, event) {
+  // Check if the word is in user's list
+  query(`SELECT word
+         FROM voc
+         WHERE user_id = '${userId}'
+         AND word = '${word}';`, (err, res) => {
+    if (err) {
+      console.log(err);
+      event.reply(errMsg);
+    } else if (res.length === 0) {
+      event.reply(`${word} 不在你的單字本中喔`);
+    } else {
+      query(`UPDATE voc
+             SET annotation = '${annotation}'
+             WHERE word = '${word}'
+             AND user_id = '${userId}';`, (err, res) => {
+        if (err) {
+          console.log(err);
+          event.reply(errMsg);
+        }
+        event.reply(`已將資料更新為 ${word} (${annotation})`);   
       });
     }
   });
@@ -88,6 +114,7 @@ const deleteWord = function (userId, word, event) {
 
 
 module.exports = {
+  addWord,
   updateWord,
   showWords,
   deleteWord

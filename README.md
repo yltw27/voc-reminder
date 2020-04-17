@@ -4,21 +4,23 @@ Build up a service to let users create vocabulary list and get notify through Li
 
 ## TODOs
 
+* Logo [done]
 * PostgreSQL - CRUD
-  * save words [done]
-  * Show voc list [done]
-  * Delete words [done]
-  * Update words [done]
+  * save words: + word/annotation [done]
+  * Show voc list: show [done]
+  * Delete words: //word [done]
+  * Update words: word/annotation [done]
   * Check daily limit (15 words?) before insertion [done]
   * Pretty show [done]
+  * Issues
+    * update after 15 words added
   * Reminder (based on spaced repetition)
-  * Test
+    * [Spaced repetition algorithm](https://zh.wikipedia.org/wiki/%E9%97%B4%E9%9A%94%E9%87%8D%E5%A4%8D)
+  * Test flow
   * Automatically archive vocabulary which is created X (?) ago with 100% familarity.
-
-* [Spaced repetition algorithm](https://zh.wikipedia.org/wiki/%E9%97%B4%E9%9A%94%E9%87%8D%E5%A4%8D)
-* Test Cases
 * LineBot Rich Menu
-* Logo
+* Test Cases (Mocha)
+* How-to blog
 
 ## PostgreSQL
 

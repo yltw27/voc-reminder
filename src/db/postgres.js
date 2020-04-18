@@ -6,23 +6,24 @@ const pool = new Pool({
   ssl: true
 });
 
-const errMsg = '很抱歉，後台出了一點問題。我們將盡快修復。';
-
-const query = function(queryString, callback) {
-  const start = Date.now();
-  pool.query(queryString, (err, res) => {
-    if (err) {
-      console.log(err);
-      callback(err);
-    }
-    callback(null, res.rows);
-  });
-  const duration = Date.now() - start;
-  console.log('executed query', {queryString, duration});
+const replyErrorMsg = function (err, event) {
+  event.reply('很抱歉，後台出了一點問題。我們將盡快修復。');
+  console.log(err);
 };
-// query('SELECT * FROM status;', (err, res) => {
-//   console.log(err, res);
-// });
+
+const query = function(queryString) {
+  return new Promise((resolve, reject) => {
+    const start = Date.now();
+    try {
+      const res = pool.query(queryString);
+      const duration = Date.now() - start;
+      console.log('executed query', {queryString, duration});
+      resolve(res);
+    } catch (e) {
+      reject(e);
+    }
+  });
+};
 
 const addWord = function (userId, word, annotation, event) {
   // Check if daily created words > 15
@@ -34,9 +35,9 @@ const addWord = function (userId, word, annotation, event) {
       console.log(err);
       event.reply(errMsg);
     }
-    const num = parseInt(res[0].count);
+    const num = parseInt(res.rows[0].count);
     if (num >= 15) {
-      event.reply(`你今天已經新增${num}個單字囉! 每24小時只能新增15個單字`);
+      event.reply(`你已經新增${num}個單字囉! 每24小時只能新增15個單字`);
     } else {
       query(`INSERT INTO voc (user_id, word, annotation) 
              VALUES ('${userId}', '${word}', '${annotation}') 
@@ -62,7 +63,7 @@ const updateWord = function(userId, word, annotation, event) {
     if (err) {
       console.log(err);
       event.reply(errMsg);
-    } else if (res.length === 0) {
+    } else if (res.rows.length === 0) {
       event.reply(`${word} 不在你的單字本中喔`);
     } else {
       query(`UPDATE voc
@@ -80,26 +81,24 @@ const updateWord = function(userId, word, annotation, event) {
   });
 };
 
-const showWords = function (userId, event) {
-  query(`SELECT word, annotation
-         FROM voc
-         WHERE user_id = '${userId}'
-         ORDER BY level ASC, updated_at ASC;`, (err, res) => {
-    if (err) {
-      console.log(err);
-      event.reply(errMsg);
-    }
-
-    if (res.length === 0) {
+const showWords = async function (userId, event) {
+  try {
+    const res = await query(`SELECT word, annotation
+                             FROM voc
+                             WHERE user_id = '${userId}'
+                             ORDER BY level ASC, updated_at ASC;`);
+    if (res.rows.length === 0) {
       event.reply('你的單字本裡面沒有單字欸');
     } else {
       let msg = '';
-      for (let i in res) {
-        msg += `${res[i].word}\n${res[i].annotation}\n--\n`;
+      for (let i in res.rows) {
+        msg += `${res.rows[i].word}\n${res.rows[i].annotation}\n--\n`;
       }
       event.reply(msg);
     }
-  });
+  } catch (e) {
+    replyErrorMsg(e, event);
+  }
 };
 
 const deleteWord = function (userId, word, event) {
@@ -114,46 +113,48 @@ const deleteWord = function (userId, word, event) {
   });
 };
 
-const words = function (rows) {
+const reviewWords = async function (userId, event) {
 
-};
 
-const reviewWords = function (userId, event) {
-  // 1. Save user's top 25 words into a temp table
-  query(`CREATE TABLE review_${userId} AS
+
+  // Save user's top 25 words into a temp table
+  await query(`CREATE TEMP TABLE review_${userId} AS
            SELECT voc.word, voc.annotation, voc.level
            FROM voc
            WHERE user_id = '${userId}'
            ORDER BY level ASC, updated_at ASC
            LIMIT 25;`, (err, res) => {
+    console.log('create executed');
     if (err) {
-      console.log(err);
+      // console.log(err);
       event.reply(errMsg);
     }
-    query(`ALTER TABLE review_${userId}
-           ADD COLUMN correct INT DEFAULT 0;`, (err, res) => {
-      if (err) {
-        console.log(err);
-        event.reply(errMsg);
-      }
-    });
-
-    // Show table
-    query(`SELECT * FROM review_${userId}`, (err, res) => {
-      console.log(err, res);
-    })
-
-    // get user's answers and update temp table (correct and level)
-
-    // send score back
-
-    // Drop temp table
-    // query(`DROP TABLE review_${userId};`, (err, res) => {
-    //   console.log(err, res);
-    // });
   });  
 
-  
+  await query(`ALTER TABLE review_${userId}
+               ADD COLUMN correct INT DEFAULT 0;`, (err, res) => {
+    console.log('alter executed');
+    if (err) {
+      // console.log(err);
+      event.reply(errMsg);
+    }
+  });
+
+  // Show table
+  await query(`SELECT * FROM review_${userId}`, (err, res) => {
+    console.log('show executed');
+    // console.log(err, res);
+  })
+
+  // // get user's answers and update temp table (correct and level)
+
+  // // send score back
+
+  // // Drop temp table
+  // await query(`DROP TABLE review_${userId};`, (err, res) => {
+  //   console.log('drop executed');
+  //   // console.log(err, res);
+  // });
 };
 
 module.exports = {

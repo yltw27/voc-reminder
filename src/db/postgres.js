@@ -25,60 +25,49 @@ const query = function(queryString) {
   });
 };
 
-const addWord = function (userId, word, annotation, event) {
-  // Check if daily created words > 15
-  query(`SELECT count(1) 
-         FROM voc
-         WHERE user_id = '${userId}'
-         AND created_at > now() - interval '1 day';`, (err, res) => {
-    if (err) {
-      console.log(err);
-      event.reply(errMsg);
-    }
-    const num = parseInt(res.rows[0].count);
+const addWord = async function (userId, word, annotation, event) {
+  try {
+    // Check if daily created words > 15
+    let num = await query(`SELECT count(1) 
+                           FROM voc
+                           WHERE user_id = '${userId}'
+                           AND created_at > now() - interval '1 day';`);
+    num = parseInt(num.rows[0].count);
     if (num >= 15) {
-      event.reply(`你已經新增${num}個單字囉! 每24小時只能新增15個單字`);
-    } else {
-      query(`INSERT INTO voc (user_id, word, annotation) 
-             VALUES ('${userId}', '${word}', '${annotation}') 
-             ON CONFLICT (user_id, word) 
-             DO UPDATE SET annotation = '${annotation}',
-                           updated_at = NOW();`, (err, res) => {
-        if (err) {
-          console.log(err);
-          event.reply(errMsg);
-        }
-        event.reply(`已將 ${word} (${annotation}) 存到資料庫`);
-      });
+      return event.reply(`你已經新增${num}個單字囉! 每24小時只能新增15個單字`);
     }
-  });
+
+    await query(`INSERT INTO voc (user_id, word, annotation) 
+                 VALUES ('${userId}', '${word}', '${annotation}') 
+                 ON CONFLICT (user_id, word) 
+                 DO UPDATE SET annotation = '${annotation}',
+                               updated_at = NOW();`);
+    event.reply(`已將 ${word} (${annotation}) 存到資料庫`);
+  } catch (e) {
+    replyErrorMsg(e, event);
+  }
 };
 
-const updateWord = function(userId, word, annotation, event) {
-  // Check if the word is in user's list
-  query(`SELECT word
-         FROM voc
-         WHERE user_id = '${userId}'
-         AND word = '${word}';`, (err, res) => {
-    if (err) {
-      console.log(err);
-      event.reply(errMsg);
-    } else if (res.rows.length === 0) {
-      event.reply(`${word} 不在你的單字本中喔`);
-    } else {
-      query(`UPDATE voc
-             SET annotation = '${annotation}',
-                 updated_at = NOW()
-             WHERE word = '${word}'
-             AND user_id = '${userId}';`, (err, res) => {
-        if (err) {
-          console.log(err);
-          event.reply(errMsg);
-        }
-        event.reply(`已將資料更新為 ${word} (${annotation})`);   
-      });
+const updateWord = async function(userId, word, annotation, event) {
+  try {
+    // Check if the word is in user's list
+    const count = await query(`SELECT word
+                               FROM voc
+                               WHERE user_id = '${userId}'
+                               AND word = '${word}';`);
+    if (count.rows.length === 0) {
+      return event.reply(`${word} 不在你的單字本中喔`);
     }
-  });
+
+    await query(`UPDATE voc
+                 SET annotation = '${annotation}',
+                     updated_at = NOW()
+                 WHERE word = '${word}'
+                 AND user_id = '${userId}';`);
+    event.reply(`已將資料更新為 ${word} (${annotation})`);
+  } catch (e) {
+    replyErrorMsg(e, event);
+  }
 };
 
 const showWords = async function (userId, event) {
@@ -101,16 +90,15 @@ const showWords = async function (userId, event) {
   }
 };
 
-const deleteWord = function (userId, word, event) {
-  query(`DELETE FROM voc 
-         WHERE user_id = '${userId}' 
-         AND word = '${word}';`, (err, res) => {
-    if (err) {
-      console.log(err);
-      event.reply(errMsg);
-    }
+const deleteWord = async function (userId, word, event) {
+  try {
+    await query(`DELETE FROM voc 
+                 WHERE user_id = '${userId}' 
+                 AND word = '${word}';`);
     event.reply(`已將 ${word} 從你的單字本移除`);
-  });
+  } catch (e) {
+    replyErrorMsg(e, event);
+  }
 };
 
 const reviewWords = async function (userId, event) {

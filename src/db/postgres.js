@@ -1,5 +1,5 @@
 
-const { Pool } = require('pg');
+const {Pool} = require('pg');
 
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
@@ -102,47 +102,32 @@ const deleteWord = async function (userId, word, event) {
 };
 
 const reviewWords = async function (userId, event) {
+  try {
+    // Save user's top 25 words into a temp table
+    await query(`CREATE TABLE review_${userId} AS
+    SELECT voc.word, voc.annotation, voc.level
+    FROM voc
+    WHERE user_id = '${userId}'
+    ORDER BY level ASC, updated_at ASC
+    LIMIT 25;`); 
 
+    // add correct column
+    await query(`ALTER TABLE review_${userId}
+               ADD COLUMN correct INT DEFAULT 0;`);
 
+    // show table
+    const res = await query(`SELECT * FROM review_${userId}`);
+    console.log(res.rows);
 
-  // Save user's top 25 words into a temp table
-  await query(`CREATE TEMP TABLE review_${userId} AS
-           SELECT voc.word, voc.annotation, voc.level
-           FROM voc
-           WHERE user_id = '${userId}'
-           ORDER BY level ASC, updated_at ASC
-           LIMIT 25;`, (err, res) => {
-    console.log('create executed');
-    if (err) {
-      // console.log(err);
-      event.reply(errMsg);
-    }
-  });  
+    // get user's answers and update temp table (correct and level)
 
-  await query(`ALTER TABLE review_${userId}
-               ADD COLUMN correct INT DEFAULT 0;`, (err, res) => {
-    console.log('alter executed');
-    if (err) {
-      // console.log(err);
-      event.reply(errMsg);
-    }
-  });
+    // send score back
 
-  // Show table
-  await query(`SELECT * FROM review_${userId}`, (err, res) => {
-    console.log('show executed');
-    // console.log(err, res);
-  })
-
-  // // get user's answers and update temp table (correct and level)
-
-  // // send score back
-
-  // // Drop temp table
-  // await query(`DROP TABLE review_${userId};`, (err, res) => {
-  //   console.log('drop executed');
-  //   // console.log(err, res);
-  // });
+    // drop the table
+    await query(`DROP TABLE review_${userId};`);
+  } catch (e) {
+    replyErrorMsg(e, event);
+  }
 };
 
 module.exports = {
@@ -151,12 +136,4 @@ module.exports = {
   showWords,
   deleteWord,
   reviewWords
-  // query: (queryString, callback) => {
-  //   const start = Date.now();
-  //   return pool.query(queryString, (err, res) => {
-  //     const duration = Date.now() - start;
-  //     console.log('executed query', {queryString, duration}); //, rows: res.rowCount});
-  //     callback(err, res);
-  //   })
-  // },
 };

@@ -12,12 +12,13 @@ Build up a service to let users create vocabulary list and get notify through Li
   * Update words: word/annotation [done]
   * Check daily limit (15 words?) before insertion [done]
   * Pretty show [done]
-  
+
   * Review (based on spaced repetition)
 * LineBot Rich Menu
 * Test Cases (Mocha)
 * How-to blog
 * Limit the number of show?
+* Custom review limit
 * Voc Testing flow
 
 ## PostgreSQL

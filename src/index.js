@@ -11,21 +11,19 @@ const bot = linebot({
 });
 
 bot.on('message', function(event) {
-  const userMsg = event.message.text.trim();
+  const userMsg = event.message.text;
   const userId = event.source.userId;
-
   if (userMsg.includes('//')) {
     deleteWord(userId, userMsg.split('//')[1].trim(), event);
-  } else if (userMsg.toLowerCase() === 'show') {
+  } else if (userMsg.trim().toLowerCase() === 'show') {
     showWords(userId, event);
-  } else if (userMsg.toLowerCase() === 'review') {
+  } else if (userMsg.trim().toLowerCase() === 'review') {
     reviewWords(userId, event);
   } else if (userMsg.includes('+')) {
     const pair = userMsg.replace('+', '').split('/');
     addWord(userId, pair[0].trim(), pair[1].trim(), event);
   } else {
     const pair = userMsg.split('/');
-    console.log(pair);
     updateWord(userId, pair[0].trim(), pair[1].trim(), event);
   }
 });

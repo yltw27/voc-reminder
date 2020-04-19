@@ -1,7 +1,7 @@
 const linebot = require('linebot');
 const express = require('express');
 const bodyParser = require('body-parser');
-const {addWord, updateWord, showWords, deleteWord, reviewWords} = require('./db/postgres');
+const db = require('./db/postgres');
 
 const bot = linebot({
   channelId: process.env.LINE_CHANNEL_ID,
@@ -10,21 +10,33 @@ const bot = linebot({
   verify: false
 });
 
-bot.on('message', function(event) {
+bot.on('message', async function(event) {
   const userMsg = event.message.text;
   const userId = event.source.userId;
-  if (userMsg.includes('//')) {
-    deleteWord(userId, userMsg.split('//')[1].trim(), event);
+
+  // Check if the mode is 'review'
+  const review = await db.isReviewMode(userId, userMsg, event);
+  if (review === true) {
+    if (userMsg.toLowerCase().trim() !== '#end') {
+      db.checkAnswer(userId, userMsg, event);
+    } 
+    return; 
+  } 
+
+  if (userMsg.trim().toLowerCase() === 'review') {
+    db.startReviewMode(userId, event);
+  } else if (userMsg.includes('//')) {
+    db.deleteWord(userId, userMsg.split('//')[1].trim(), event);
   } else if (userMsg.trim().toLowerCase() === 'show') {
-    showWords(userId, event);
+    db.showWords(userId, event);
   } else if (userMsg.trim().toLowerCase() === 'review') {
-    reviewWords(userId, event);
+    db.startReviewMode(userId, event);
   } else if (userMsg.includes('+')) {
     const pair = userMsg.replace('+', '').split('/');
-    addWord(userId, pair[0].trim(), pair[1].trim(), event);
+    db.addWord(userId, pair[0].trim(), pair[1].trim(), event);
   } else {
     const pair = userMsg.split('/');
-    updateWord(userId, pair[0].trim(), pair[1].trim(), event);
+    db.updateWord(userId, pair[0].trim(), pair[1].trim(), event);
   }
 });
 

@@ -12,14 +12,37 @@ Build up a service to let users create vocabulary list and get notify through Li
   * Update words: word/annotation [done]
   * Check daily limit (15 words?) before insertion [done]
   * Pretty show [done]
-
   * Review (based on spaced repetition)
+    * score calculation
+
 * LineBot Rich Menu
+  * Add button for introduction (basic commands)
+  * Welcome message
+
+        {Nickname}，您好(hello)！
+        感謝您成為{AccountName}的好友！
+
+        [使用說明]
+        新增單字： +新單字/定義 ( +mobile/手機 )
+        修改定義： 單字/新定義 ( mobile/行動電話 )
+        刪除單字： //單字 ( //mobile )
+        複習單字： review
+        結束複習： #end
+        顯示單字： show
+
+        複習模式有時回覆很慢，請過1分鐘後重傳一次答案，或直接輸入 #end 結束複習。
+
+        若不想接收提醒，可以點畫面右上方的選單圖示，然後關閉「提醒」喔。
+
+* Use caching ?
+* Convert to English version
 * Test Cases (Mocha)
 * How-to blog
+* Update word or annotation
 * Limit the number of show?
 * Custom review limit
 * Voc Testing flow
+* IELTs/TOEIC/exams voc?
 
 ## PostgreSQL
 
@@ -38,6 +61,14 @@ Build up a service to let users create vocabulary list and get notify through Li
         unique (user_id, word)
       );
 
+      CREATE TABLE status (
+        user_id VARCHAR(80) NOT NULL,
+        mode VARCHAR(30) DEFAULT 'normal',
+        pointer INT DEFAULT 0,
+        updated_at TIMESTAMPTZ DEFAULT NOW(),
+        unique (user_id)
+      );
+
 ## Test Changes Locally
 
 1. Start ngrok `ngrok http 3000` (Change 3000 to your port)
@@ -50,6 +81,7 @@ Build up a service to let users create vocabulary list and get notify through Li
 ### Line ChatBot
 
 * [手把手教你建聊天機器人(linebot+nodjes+ngrok)](https://medium.com/@mengchiang000/%E6%89%8B%E6%8A%8A%E6%89%8B%E6%95%99%E4%BD%A0%E5%BB%BA%E8%81%8A%E5%A4%A9%E6%A9%9F%E5%99%A8%E4%BA%BA-linebot-nodjes-ngrok-7ad028d97a07)
+* [Line Emoji Reference](https://devdocs.line.me/files/emoticon.pdf)
 
 ### Postgre
 

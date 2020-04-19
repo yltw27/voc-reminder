@@ -1,6 +1,6 @@
 # Voc Reminder
 
-Build up a service to let users create vocabulary list and get notify through Line ChatBot based on [spaced repetition](https://en.wikipedia.org/wiki/Spaced_repetition).
+Build up a Line ChatBot to let users create vocabulary list and review it based on spaced repetition.
 
 ## TODOs
 
@@ -14,6 +14,14 @@ Build up a service to let users create vocabulary list and get notify through Li
   * Pretty show [done]
   * Review (based on spaced repetition)
     * score calculation
+
+* Use caching ?
+* Convert to English version
+* Test Cases (Mocha)
+* How-to blog
+* Update word or annotation
+* Limit the number of show?
+* Custom review limit
 
 * LineBot Rich Menu
   * Add button for introduction (basic commands)
@@ -34,14 +42,6 @@ Build up a service to let users create vocabulary list and get notify through Li
 
         若不想接收提醒，可以點畫面右上方的選單圖示，然後關閉「提醒」喔。
 
-* Use caching ?
-* Convert to English version
-* Test Cases (Mocha)
-* How-to blog
-* Update word or annotation
-* Limit the number of show?
-* Custom review limit
-* Voc Testing flow
 * IELTs/TOEIC/exams voc?
 
 ## PostgreSQL

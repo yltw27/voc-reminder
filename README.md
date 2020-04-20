@@ -38,8 +38,6 @@ Build up a Line ChatBot to let users create vocabulary list and review it based 
         結束複習： #end
         顯示單字： show
 
-        複習模式有時回覆很慢，請過1分鐘後重傳一次答案，或直接輸入 #end 結束複習。
-
         若不想接收提醒，可以點畫面右上方的選單圖示，然後關閉「提醒」喔。
 
 * IELTs/TOEIC/exams voc?

@@ -139,7 +139,7 @@ const startReviewMode = async function (userId, event) {
            DO UPDATE SET mode = 'review', pointer = 1;`);
 
     // Print the first word
-    const res = await query(`SELECT * FROM review_${userId} ORDER BY updated_at ASC LIMIT 1`);
+    const res = await query(`SELECT * FROM review_${userId} ORDER BY id LIMIT 1`);
     event.reply('複習開始囉！請回答這個單字的意思：'+res.rows[0].word);
   } catch (e) {
     replyErrorMsg(e, event);

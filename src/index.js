@@ -14,6 +14,10 @@ bot.on('message', async function(event) {
   const userMsg = event.message.text;
   const userId = event.source.userId;
 
+  if (userMsg.toLowerCase().trim() === 'help') {
+    return event.reply(`[Commands]\nAdd a new word:\n+ word/definition\n\nUpdate a word:\nword/new definition\n\nDelete a word:\n//word\n\nReview mode:\nreview\n\nEnd review mode:\n#end\n\nShow all words:\nshow\n\n- You can choose any language for words and definitions.\n- Happy Learning!`);
+  }
+
   // Check if the mode is 'review'
   const review = await db.isReviewMode(userId, userMsg, event);
   if (review === true) {

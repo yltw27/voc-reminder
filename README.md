@@ -13,34 +13,43 @@ Build up a Line ChatBot to let users create vocabulary list and review it based 
   * Check daily limit (15 words?) before insertion [done]
   * Pretty show [done]
   * Review (based on spaced repetition)
-    * score calculation
+    * #end but status != review
+    * only 1 word in list
+  * bot.listen: join -> update status table
 
-* Use caching ?
-* Convert to English version
-* Test Cases (Mocha)
-* How-to blog
+* Use caching
+  * local redis
+  * Heroku redis
+
 * Update word or annotation
 * Limit the number of show?
 * Custom review limit
+* default word list and import/export
+* Test Cases (Mocha)
+
+* How-to blog
 
 * LineBot Rich Menu
-  * Add button for introduction (basic commands)
+  * Pretty buttons
+    * review mode
+    * end review
+    * show
+    * help
   * Welcome message
 
-        {Nickname}，您好(hello)！
-        感謝您成為{AccountName}的好友！
+        Hello, {Nickname}！
+        Thank you for adding {AccountName} :)
 
-        [使用說明]
-        新增單字： +新單字/定義 ( +mobile/手機 )
-        修改定義： 單字/新定義 ( mobile/行動電話 )
-        刪除單字： //單字 ( //mobile )
-        複習單字： review
-        結束複習： #end
-        顯示單字： show
+        [How to Use {AccoungName}]
+        Add a new word:  + word/definition
+        Update a word:   word/new definition
+        Delete a word:   //word
+        Review mode:     review
+        End review mode: #end
+        Show all words:  show
 
-        若不想接收提醒，可以點畫面右上方的選單圖示，然後關閉「提醒」喔。
-
-* IELTs/TOEIC/exams voc?
+        - You can choose any language for words and definitions.
+        - Happy Learning!
 
 ## PostgreSQL
 
@@ -93,3 +102,7 @@ Build up a Line ChatBot to let users create vocabulary list and review it based 
 ### Spaced Repetition
 
 * [Spaced repetition algorithm](https://zh.wikipedia.org/wiki/%E9%97%B4%E9%9A%94%E9%87%8D%E5%A4%8D)
+
+### Caching (Redis)
+
+* [Learn to Cache your NodeJS Application with Redis in 6 Minutes!](https://itnext.io/learn-to-cache-your-nodejs-application-with-redis-in-6-minutes-745a574a9739)

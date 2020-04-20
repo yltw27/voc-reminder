@@ -7,7 +7,7 @@ const pool = new Pool({
 });
 
 const replyErrorMsg = function (err, event) {
-  event.reply('很抱歉，後台出了一點問題。我們將盡快修復。');
+  event.reply('Sorry.. Something\'s going wrong. We are trying to fix this problem \uDBC0\uDC87');
   console.log(err);
 };
 
@@ -34,14 +34,13 @@ const addWord = async function (userId, word, annotation, event) {
                            AND created_at > now() - interval '1 day';`);
     num = parseInt(num.rows[0].count);
     if (num >= 15) {
-      return event.reply(`你已經新增${num}個單字囉! 每24小時只能新增15個單字`);
+      return event.reply(`You can only add 15 new words every 24 hours.`);
     } else {
       await query(`INSERT INTO voc (user_id, word, annotation) 
-                 VALUES ('${userId}', '${word}', '${annotation}') 
-                 ON CONFLICT (user_id, word) 
-                 DO UPDATE SET annotation = '${annotation}',
-                               updated_at = NOW();`);
-      event.reply(`已將 ${word} (${annotation}) 存到資料庫`);
+                   VALUES ('${userId}', '${word}', '${annotation}') 
+                   ON CONFLICT (user_id, word) 
+                   DO UPDATE SET annotation = '${annotation}', updated_at = NOW();`);
+      event.reply(`${word} (${annotation}) is saved.`);
       query(`UPDATE status SET total = total + 1 WHERE user_id = '${userId}';`);
     }
   } catch (e) {
@@ -57,7 +56,7 @@ const updateWord = async function(userId, word, annotation, event) {
                                WHERE user_id = '${userId}'
                                AND word = '${word}';`);
     if (count.rows.length === 0) {
-      return event.reply(`${word} 不在你的單字本中喔`);
+      return event.reply(`${word} is not in your word list.`);
     }
 
     await query(`UPDATE voc
@@ -65,7 +64,7 @@ const updateWord = async function(userId, word, annotation, event) {
                      updated_at = NOW()
                  WHERE word = '${word}'
                  AND user_id = '${userId}';`);
-    event.reply(`已將資料更新為 ${word} (${annotation})`);
+    event.reply(`The definition of ${word} is updated to ${annotation}.`);
   } catch (e) {
     replyErrorMsg(e, event);
   }
@@ -78,7 +77,7 @@ const showWords = async function (userId, event) {
                              WHERE user_id = '${userId}'
                              ORDER BY level ASC, updated_at ASC;`);
     if (res.rows.length === 0) {
-      event.reply('你的單字本裡面沒有單字欸');
+      event.reply('There isn\'t any word in your list.');
     } else {
       let msg = '';
       for (let i in res.rows) {
@@ -96,7 +95,7 @@ const deleteWord = async function (userId, word, event) {
     await query(`DELETE FROM voc 
                  WHERE user_id = '${userId}' 
                  AND word = '${word}';`);
-    event.reply(`已將 ${word} 從你的單字本移除`);
+    event.reply(`${word} is removed from your list.`);
     query(`UPDATE status SET total = total - 1 WHERE user_id = '${userId}';`);
   } catch (e) {
     replyErrorMsg(e, event);
@@ -122,16 +121,16 @@ const startReviewMode = async function (userId, event) {
   try {
     // Save user's top 25 words into a temp table
     await query(`CREATE TABLE review_${userId} AS
-    SELECT voc.word, voc.annotation, voc.level, voc.updated_at
-    FROM voc
-    WHERE user_id = '${userId}'
-    ORDER BY level ASC, updated_at ASC
-    LIMIT 25;`); 
+                 SELECT voc.word, voc.annotation, voc.level, voc.updated_at
+                 FROM voc
+                 WHERE user_id = '${userId}'
+                 ORDER BY level ASC, updated_at ASC
+                 LIMIT 25;`); 
 
     // add id, correct column
     await query(`ALTER TABLE review_${userId}
-               ADD COLUMN correct INT DEFAULT 0,
-               ADD COLUMN id serial;`);
+                 ADD COLUMN correct INT DEFAULT 0,
+                 ADD COLUMN id serial;`);
 
     query(`INSERT INTO status (user_id, mode, pointer)
            VALUES ('${userId}', 'review', 1)
@@ -140,7 +139,7 @@ const startReviewMode = async function (userId, event) {
 
     // Print the first word
     const res = await query(`SELECT * FROM review_${userId} ORDER BY id LIMIT 1`);
-    event.reply('複習開始囉！請回答這個單字的意思：'+res.rows[0].word);
+    event.reply('Turn on review mode \uDBC0\uDC8D\nPlease enter the definition of this word:\n'+res.rows[0].word);
   } catch (e) {
     replyErrorMsg(e, event);
   }
@@ -152,7 +151,7 @@ const endReviewMode = async function(userId, event) {
     pointer = parseInt(pointer.rows[0].pointer)-1;
     const res = await query(`SELECT sum(correct), count(correct) FROM review_${userId};`);
     const score = Math.round(parseInt(res.rows[0].sum) / pointer * 100);
-    let scoreMsg = `已結束複習模式。這次的答題正確率為: ${score} % `;
+    let scoreMsg = `Turn off review mode.\nYou got ${score} % right this time! `;
     switch (true) {
       case (score == 0): 
         scoreMsg += '\uDBC0\uDC7C';
@@ -176,11 +175,11 @@ const endReviewMode = async function(userId, event) {
 
     // save changed levels to voc table
     await query(`UPDATE voc voc
-           SET level = review.level, updated_at = now()
-           FROM review_${userId} review
-           WHERE voc.word = review.word
-           AND review.id <= ${pointer}
-           AND voc.user_id = '${userId}';`);
+                 SET level = review.level, updated_at = now()
+                 FROM review_${userId} review
+                 WHERE voc.word = review.word
+                 AND review.id <= ${pointer}
+                 AND voc.user_id = '${userId}';`);
 
     // set mode to 'normal' and pointer to 1 (status table)
     query(`UPDATE status
@@ -218,21 +217,16 @@ const checkAnswer = async function(userId, userMsg, event) {
       nextWord = res.rows[0].word;
     }
 
-    if (userMsg.toLowerCase() === answer.annotation) {
+    if (userMsg.toLowerCase().trim() === answer.annotation) {
       await query(`UPDATE review_${userId}
-             SET level = ${answer.level+1}, correct = 1
-             WHERE word = '${answer.word}';`);
-      event.reply(`答對囉\uDBC0\uDC84\n下一題: ${nextWord}`);
-    } else if (userMsg+'的' === answer.annotation) {
-      await query(`UPDATE review_${userId}
-             SET correct = 0.5
-             WHERE word = '${answer.word}';`);
-      event.reply(`差不多啦\uDBC0\uDC9D 原本是 ${answer.annotation}\n下一題: ${nextWord}`);
+                   SET level = ${answer.level+1}, correct = 1
+                   WHERE word = '${answer.word}';`);
+      event.reply(`Correct! \uDBC0\uDC79\nNext word: ${nextWord}`);
     } else {
       await query(`UPDATE review_${userId}
-             SET level = ${answer.level-1}
-             WHERE word = '${answer.word}';`);
-      event.reply(`答錯啦\uDBC0\uDC7D 應該是 ${answer.annotation}\n下一題: ${nextWord}`);
+                   SET level = ${answer.level-1}
+                   WHERE word = '${answer.word}';`);
+      event.reply(`Wrong.. \uDBC0\uDC7D\nIt should be "${answer.annotation}"\nNext word: ${nextWord}`);
     }
   } catch (e) {
     replyErrorMsg(e, event);

@@ -15,26 +15,20 @@ Build up a Line ChatBot to let users create vocabulary list and review it based 
   * Review (based on spaced repetition)
     * #end but status != review
     * only 1 word in list
-  * bot.listen: join -> update status table
+  * bot.listen: join -> insert into status table
 
 * Use caching
   * local redis
   * Heroku redis
 
-* Update word or annotation
 * Limit the number of show?
-* Custom review limit
+* Custom review limit?
 * default word list and import/export
 * Test Cases (Mocha)
 
 * How-to blog
 
-* LineBot Rich Menu
-  * Pretty buttons
-    * review mode
-    * end review
-    * show
-    * help
+* LineBot Rich Menu [done]
   * Welcome message
 
         Hello, {Nickname}！

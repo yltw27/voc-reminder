@@ -25,6 +25,17 @@ const query = function(queryString) {
   });
 };
 
+const addUserStatus = function(userId) {
+  try {
+    query(`INSERT INTO status (user_id, mode, pointer)
+         VALUES ('${userId}', 'normal', 1)
+         ON CONFLICT (user_id)
+         DO UPDATE SET mode = 'normal', pointer = 1, updated_at = NOW();`);
+  } catch (e) {
+    replyErrorMsg(e, event);
+  }
+};
+
 const addWord = async function (userId, word, annotation, event) {
   try {
     // Check if daily created words > 15
@@ -240,5 +251,6 @@ module.exports = {
   deleteWord,
   startReviewMode,
   isReviewMode,
-  checkAnswer
+  checkAnswer,
+  addUserStatus
 };

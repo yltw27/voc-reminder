@@ -10,12 +10,16 @@ const bot = linebot({
   verify: false
 });
 
+bot.on('follow', async function(event) {
+  db.addUserStatus(event.source.userId);
+});
+
 bot.on('message', async function(event) {
   const userMsg = event.message.text;
   const userId = event.source.userId;
 
   if (userMsg.toLowerCase().trim() === 'help') {
-    return event.reply(`[Commands]\nAdd a new word:\n+ word/definition\n\nUpdate a word:\nword/new definition\n\nDelete a word:\n//word\n\nReview mode:\nreview\n\nEnd review mode:\n#end\n\nShow all words:\nshow\n\n- You can choose any language for words and definitions.\n- Happy Learning!`);
+    return event.reply(`[Commands]\nAdd a new word:\n+ word/definition\n\nUpdate a word:\nword/new definition\n\nDelete a word:\n//word\n\nStart review mode:\nreview\n\nEnd review mode:\n#end\n\nShow all words:\nshow\n\n- You can choose any language for words and definitions.\n- Happy Learning!`);
   }
 
   // Check if the mode is 'review'

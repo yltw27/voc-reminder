@@ -1,5 +1,5 @@
-
 const {Pool} = require('pg');
+const cache = require('./cache');
 
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
@@ -115,19 +115,31 @@ const deleteWord = async function (userId, word, event) {
 
 const isReviewMode = async function (userId, userMsg, event) {
   try {
-    const res = await query(`SELECT mode FROM status WHERE user_id = '${userId}';`);
+    let mode = 'normal';
+    const cacheResult = cache.get(userId);
+    // Check if the user's mode is in redis
+    if (cacheResult.status) {
+      mode = cacheResult.status;
+    // if not, fetch status in database
+    } else {
+      mode = await query(`SELECT mode FROM status WHERE user_id = '${userId}';`);
+      mode = mode.rows[0].mode;
+    }
 
-    if (res.rows[0].mode === 'normal' && userMsg === '#end') {
+    if (mode === 'normal' && userMsg === '#end') {
       event.reply('You are not in review mode.');
+      cache.set(userId, 3600, JSON.stringify({'status': 'normal'}));
       return true; // end dialog
     }
 
-    if (res.rows[0].mode === 'review') {
+    if (mode === 'review') {
       if (userMsg === '#end') {
         endReviewMode(userId, null, event);
       }
+      cache.set(userId, 3600, JSON.stringify({'status': 'review'}));
       return true;
     }
+    cache.set(userId, 3600, JSON.stringify({'status': 'normal'}));
     return false;
   } catch (e) {
     console.log(e);
@@ -137,27 +149,122 @@ const isReviewMode = async function (userId, userMsg, event) {
 
 const startReviewMode = async function (userId, event) {
   try {
-    // Save user's top 25 words into a temp table
-    await query(`CREATE TABLE review_${userId} AS
-                 SELECT voc.word, voc.annotation, voc.level, voc.updated_at
-                 FROM voc
-                 WHERE user_id = '${userId}'
-                 ORDER BY level ASC, updated_at ASC
-                 LIMIT 25;`); 
+    // // Save user's top 25 words into a temp table
+    // await query(`CREATE TABLE review_${userId} AS
+    //              SELECT voc.word, voc.annotation, voc.level, voc.updated_at
+    //              FROM voc
+    //              WHERE user_id = '${userId}'
+    //              ORDER BY level ASC, updated_at ASC
+    //              LIMIT 25;`); 
 
-    // add id, correct column
-    await query(`ALTER TABLE review_${userId}
-                 ADD COLUMN correct INT DEFAULT 0,
-                 ADD COLUMN id serial;`);
+    // // add id, correct column
+    // await query(`ALTER TABLE review_${userId}
+    //              ADD COLUMN correct INT DEFAULT 0,
+    //              ADD COLUMN id serial;`);
 
     query(`INSERT INTO status (user_id, mode, pointer)
            VALUES ('${userId}', 'review', 1)
            ON CONFLICT (user_id)
            DO UPDATE SET mode = 'review', pointer = 1;`);
 
+    // save words and annotations in cache
+    let words = await query(`SELECT word, annotation, level
+                         FROM voc 
+                         WHERE user_id = '${userId}' 
+                         ORDER BY level ASC, updated_at ASC
+                         LIMIT 25;`);
+    words = words.rows;
+    let wordDict = {};
+    for (idx in words.rows) {
+      wordDict[idx] = {
+        word: words[idx].word,
+        annotation: words[idx].annotation,
+        level: words[idx].level,
+        correct: 0
+      };
+    }
+    cache.set(userId+'_voc', wordDict);
+    cache.set(userId, {
+      status: 'review',
+      currentWord: words[0].word,
+      total: words.length,
+      pointer: 0,
+      correct: 0
+    });
+
     // Print the first word
-    const res = await query(`SELECT * FROM review_${userId} ORDER BY id LIMIT 1`);
-    event.reply('Turn on review mode \uDBC0\uDC8D\nPlease enter the definition of this word:\n'+res.rows[0].word);
+    // const res = await query(`SELECT * FROM review_${userId} ORDER BY id LIMIT 1`);
+    event.reply('Turn on review mode \uDBC0\uDC8D\nPlease enter the definition of this word:\n'+words[0].word);
+  } catch (e) {
+    replyErrorMsg(e, event);
+  }
+};
+
+const checkAnswer = async function(userId, userMsg, event) {
+  try {
+    // get pointer from table status
+    // let pointer = await query(`SELECT pointer, total FROM status WHERE user_id = '${userId}';`);
+    // const total = pointer.rows[0].total;
+    // pointer = pointer.rows[0].pointer;
+
+    // // get the correct annotation and save result
+    // let answer = await query(`SELECT * FROM review_${userId} WHERE id = ${pointer};`);
+    // answer = answer.rows[0];
+
+    // get pointer and other info from cache
+    const userInfo = cache.get(userId);
+    const userVoc = cache.get(userId+'_voc');
+    const total = userInfo.total;
+    let pointer = userInfo.pointer;
+    const answer = userVoc[userInfo.currentWord].annotation;
+
+    let replyMsg = '';
+    if (userMsg.toLowerCase().trim() === answer) {
+      // await query(`UPDATE review_${userId}
+      //              SET level = ${answer.level+1}, correct = 1
+      //              WHERE word = '${answer.word}';`);
+      cache.set(userId+'_voc', {
+        currentWord: {
+          level: userVoc[currentWord].level + 1,
+          correct: 1
+        }
+      });
+      cache.set(userId, {
+        correct: userInfo.correct + 1
+      });
+      replyMsg += 'Correct! \uDBC0\uDC79';
+    } else {
+      // await query(`UPDATE review_${userId}
+      //              SET level = ${answer.level-1}
+      //              WHERE word = '${answer.word}';`);
+      cache.set(userId+'_voc', {
+        currentWord: {
+          level: userVoc[currentWord].level - 1
+        }
+      });
+      replyMsg += `Wrong.. \uDBC0\uDC7D\nIt should be "${answer.annotation}"`;
+    }
+
+    // If 25/all words are reviewed, leave review mode
+    pointer += 1;
+    if (pointer >= 25 || pointer >= total) {
+      endReviewMode(userId, replyMsg, event);
+    } else {
+      query(`UPDATE status
+             SET pointer = ${pointer}
+             WHERE user_id = '${userId}';`);
+      
+      cache.set(userId, {
+        pointer: pointer
+      });
+
+      // const res = await query(`SELECT word FROM review_${userId} WHERE id = ${pointer};`);
+
+      const nextWord = cache.get(userId+'voc')[pointer].word;
+
+      // nextWord = res.rows[0].word;
+      event.reply(replyMsg+`\nNext word: ${nextWord}`);
+    }
   } catch (e) {
     replyErrorMsg(e, event);
   }
@@ -165,10 +272,17 @@ const startReviewMode = async function (userId, event) {
 
 const endReviewMode = async function(userId, replyMsg, event) {
   try {
-    let pointer = await query(`SELECT pointer FROM status WHERE user_id = '${userId}';`);
-    pointer = parseInt(pointer.rows[0].pointer)-1;
-    const res = await query(`SELECT sum(correct), count(correct) FROM review_${userId};`);
-    const score = Math.round(parseInt(res.rows[0].sum) / pointer * 100);
+    // let pointer = await query(`SELECT pointer FROM status WHERE user_id = '${userId}';`);
+    // pointer = parseInt(pointer.rows[0].pointer)-1;
+    // const res = await query(`SELECT sum(correct), count(correct) FROM review_${userId};`);
+
+    const userInfo = cache.get(userId);
+    const correct = userInfo.correct;
+    const total = userInfo.total;
+
+    // const score = Math.round(parseInt(res.rows[0].sum) / pointer * 100);
+    const score = Math.round(correct/total*100);
+
     let scoreMsg = `Turn off review mode.\nYou got ${score} % right this time! `;
     if (replyMsg !== null) {
       scoreMsg = `${replyMsg}\n` + scoreMsg;
@@ -195,6 +309,8 @@ const endReviewMode = async function(userId, replyMsg, event) {
     }
     event.reply(scoreMsg);
 
+    cache.set(userId, {'status': 'normal'});
+
     // save changed levels to voc table
     await query(`UPDATE voc voc
                  SET level = review.level, updated_at = now()
@@ -202,6 +318,7 @@ const endReviewMode = async function(userId, replyMsg, event) {
                  WHERE voc.word = review.word
                  AND review.id <= ${pointer}
                  AND voc.user_id = '${userId}';`);
+    // find a way to update postgres db by JSON
 
     // set mode to 'normal' and pointer to 1 (status table)
     query(`UPDATE status
@@ -209,48 +326,6 @@ const endReviewMode = async function(userId, replyMsg, event) {
            WHERE user_id = '${userId}';`);
     
     query(`DROP TABLE review_${userId};`);
-  } catch (e) {
-    replyErrorMsg(e, event);
-  }
-};
-
-const checkAnswer = async function(userId, userMsg, event) {
-  try {
-    // get pointer from table status
-    let pointer = await query(`SELECT pointer, total FROM status WHERE user_id = '${userId}';`);
-    const total = pointer.rows[0].total;
-    pointer = pointer.rows[0].pointer;
-
-    // get the correct annotation and save result
-    let answer = await query(`SELECT * FROM review_${userId} WHERE id = ${pointer};`);
-    answer = answer.rows[0];
-
-    let replyMsg = '';
-    if (userMsg.toLowerCase().trim() === answer.annotation) {
-      await query(`UPDATE review_${userId}
-                   SET level = ${answer.level+1}, correct = 1
-                   WHERE word = '${answer.word}';`);
-      // event.reply(`Correct! \uDBC0\uDC79\nNext word: ${nextWord}`);
-      replyMsg += 'Correct! \uDBC0\uDC79';
-    } else {
-      await query(`UPDATE review_${userId}
-                   SET level = ${answer.level-1}
-                   WHERE word = '${answer.word}';`);
-      // event.reply(`Wrong.. \uDBC0\uDC7D\nIt should be "${answer.annotation}"\nNext word: ${nextWord}`);
-      replyMsg(`Wrong.. \uDBC0\uDC7D\nIt should be "${answer.annotation}"`);
-    }
-
-    // If 25/all words are reviewed, leave review mode
-    if (pointer >= 25 || pointer >= total) {
-      endReviewMode(userId, replyMsg, event);
-    } else {
-      query(`UPDATE status
-             SET pointer = ${pointer+1}
-             WHERE user_id = '${userId}';`);
-      const res = await query(`SELECT word FROM review_${userId} WHERE id = ${pointer+1};`);
-      nextWord = res.rows[0].word;
-      event.reply(replyMsg+`\nNext word: ${nextWord}`);
-    }
   } catch (e) {
     replyErrorMsg(e, event);
   }

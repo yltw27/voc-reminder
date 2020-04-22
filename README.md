@@ -16,7 +16,7 @@ Build up a Line ChatBot to let users create vocabulary list and review it based 
   * bot.listen: join -> insert into status table [done]
 
 * Use caching
-  * local redis
+  * local redis -> line 321
   * Heroku redis
 
 * issues
@@ -78,6 +78,11 @@ Build up a Line ChatBot to let users create vocabulary list and review it based 
 1. Start ngrok `ngrok http 3000` (Change 3000 to your port)
 2. Update webhook URL on Line Messaging API page to https://xxxxxx.ngrok.io/yourWebhookName
 3. Start redis `redis-server` (Run redis CLI from a different terminal `redis-cli`)
+
+       // redic cli
+       // get data saved with id
+       get id
+
 4. `npm run dev`
 5. Test your change via Line account
 

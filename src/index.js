@@ -3,6 +3,8 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const db = require('./db/postgres');
 
+const port = process.env.PORT;
+
 const bot = linebot({
   channelId: process.env.LINE_CHANNEL_ID,
   channelSecret: process.env.LINE_CHANNEL_SECRET,
@@ -48,14 +50,10 @@ bot.on('message', async function(event) {
 });
 
 const app = express();
-const port = process.env.PORT;
 
+// body parser middleware
 app.use(bodyParser.json());
-app.use(
-  bodyParser.urlencoded({
-    extended: true,
-  })
-);
+app.use(bodyParser.urlencoded({extended: true}));
 
 const linebotParser = bot.parser();
 

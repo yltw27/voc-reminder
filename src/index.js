@@ -16,29 +16,28 @@ bot.on('follow', async function(event) {
 
 bot.on('message', async function(event) {
   const userMsg = event.message.text;
+  const cleanUserMsg = userMsg.toLowerCase().trim();
   const userId = event.source.userId;
 
-  if (userMsg.toLowerCase().trim() === 'help') {
+  if (cleanUserMsg === 'help') {
     return event.reply(`[Commands]\nAdd a new word:\n+ word/definition\n\nUpdate a word:\nword/new definition\n\nDelete a word:\n//word\n\nStart review mode:\nreview\n\nEnd review mode:\n#end\n\nShow all words:\nshow\n\n- You can choose any language for words and definitions.\n- Happy Learning!`);
   }
 
-  // Check if the mode is 'review'
-  const review = await db.isReviewMode(userId, userMsg, event);
+  // Check if the user is in 'review' mode
+  const review = await db.isReviewMode(userId, cleanUserMsg, event);
   if (review === true) {
-    if (userMsg.toLowerCase().trim() !== '#end') {
+    if (cleanUserMsg !== '#end') {
       db.checkAnswer(userId, userMsg, event);
     } 
-    return; 
-  } 
+    return;
+  }
 
-  if (userMsg.trim().toLowerCase() === 'review') {
+  if (cleanUserMsg === 'review') {
     db.startReviewMode(userId, event);
+  } else if (cleanUserMsg === 'show') {
+    db.showWords(userId, event);
   } else if (userMsg.includes('//')) {
     db.deleteWord(userId, userMsg.split('//')[1].trim(), event);
-  } else if (userMsg.trim().toLowerCase() === 'show') {
-    db.showWords(userId, event);
-  } else if (userMsg.trim().toLowerCase() === 'review') {
-    db.startReviewMode(userId, event);
   } else if (userMsg.includes('+')) {
     const pair = userMsg.replace('+', '').split('/');
     db.addWord(userId, pair[0].trim(), pair[1].trim(), event);

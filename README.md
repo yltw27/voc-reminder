@@ -12,14 +12,17 @@ Build up a Line ChatBot to let users create vocabulary list and review it based 
   * Update words: word/annotation [done]
   * Check daily limit (15 words?) before insertion [done]
   * Pretty show [done]
-  * Review (based on spaced repetition)
-    * #end but status != review
-    * only 1 word in list
-  * bot.listen: join -> insert into status table
+  * Review (based on spaced repetition) [done]
+  * bot.listen: join -> insert into status table [done]
 
 * Use caching
   * local redis
   * Heroku redis
+
+* issues
+  * #end but status != review [done]
+  * Check review score calculation
+  * review mode + only 1 word in list
 
 * Limit the number of show?
 * Custom review limit?
@@ -74,8 +77,9 @@ Build up a Line ChatBot to let users create vocabulary list and review it based 
 
 1. Start ngrok `ngrok http 3000` (Change 3000 to your port)
 2. Update webhook URL on Line Messaging API page to https://xxxxxx.ngrok.io/yourWebhookName
-3. `npm run dev`
-4. Test your change via Line account
+3. Start redis `redis-server` (Run redis CLI from a different terminal `redis-cli`)
+4. `npm run dev`
+5. Test your change via Line account
 
 ## References
 

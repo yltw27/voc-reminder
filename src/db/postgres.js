@@ -116,12 +116,19 @@ const deleteWord = async function (userId, word, event) {
 const isReviewMode = async function (userId, userMsg, event) {
   try {
     const res = await query(`SELECT mode FROM status WHERE user_id = '${userId}';`);
-    if (userMsg === '#end') {
-      endReviewMode(userId, event);
-      return true;
-    } else if (res.rows[0].mode === 'review') {
+
+    if (res.rows[0].mode === 'normal' && userMsg === '#end') {
+      event.reply('You are not in review mode.');
+      return true; // end dialog
+    }
+
+    if (res.rows[0].mode === 'review') {
+      if (userMsg === '#end') {
+        endReviewMode(userId, null, event);
+      }
       return true;
     }
+    return false;
   } catch (e) {
     console.log(e);
     return false;
@@ -156,13 +163,17 @@ const startReviewMode = async function (userId, event) {
   }
 };
 
-const endReviewMode = async function(userId, event) {
+const endReviewMode = async function(userId, replyMsg, event) {
   try {
     let pointer = await query(`SELECT pointer FROM status WHERE user_id = '${userId}';`);
     pointer = parseInt(pointer.rows[0].pointer)-1;
     const res = await query(`SELECT sum(correct), count(correct) FROM review_${userId};`);
     const score = Math.round(parseInt(res.rows[0].sum) / pointer * 100);
     let scoreMsg = `Turn off review mode.\nYou got ${score} % right this time! `;
+    if (replyMsg !== null) {
+      scoreMsg = `${replyMsg}\n` + scoreMsg;
+    }
+    
     switch (true) {
       case (score == 0): 
         scoreMsg += '\uDBC0\uDC7C';
@@ -214,30 +225,31 @@ const checkAnswer = async function(userId, userMsg, event) {
     let answer = await query(`SELECT * FROM review_${userId} WHERE id = ${pointer};`);
     answer = answer.rows[0];
 
-    let nextWord = '';
-    // If 25/all words are reviewed, leave review mode,
-    if (pointer == 25 || pointer >= total) {
-      endReviewMode(userId, event);
-    // else print the next word and update pointer.
+    let replyMsg = '';
+    if (userMsg.toLowerCase().trim() === answer.annotation) {
+      await query(`UPDATE review_${userId}
+                   SET level = ${answer.level+1}, correct = 1
+                   WHERE word = '${answer.word}';`);
+      // event.reply(`Correct! \uDBC0\uDC79\nNext word: ${nextWord}`);
+      replyMsg += 'Correct! \uDBC0\uDC79';
+    } else {
+      await query(`UPDATE review_${userId}
+                   SET level = ${answer.level-1}
+                   WHERE word = '${answer.word}';`);
+      // event.reply(`Wrong.. \uDBC0\uDC7D\nIt should be "${answer.annotation}"\nNext word: ${nextWord}`);
+      replyMsg(`Wrong.. \uDBC0\uDC7D\nIt should be "${answer.annotation}"`);
+    }
+
+    // If 25/all words are reviewed, leave review mode
+    if (pointer >= 25 || pointer >= total) {
+      endReviewMode(userId, replyMsg, event);
     } else {
       query(`UPDATE status
              SET pointer = ${pointer+1}
              WHERE user_id = '${userId}';`);
       const res = await query(`SELECT word FROM review_${userId} WHERE id = ${pointer+1};`);
-      // event.reply(`下一題：${res.rows[0].word}`);
       nextWord = res.rows[0].word;
-    }
-
-    if (userMsg.toLowerCase().trim() === answer.annotation) {
-      await query(`UPDATE review_${userId}
-                   SET level = ${answer.level+1}, correct = 1
-                   WHERE word = '${answer.word}';`);
-      event.reply(`Correct! \uDBC0\uDC79\nNext word: ${nextWord}`);
-    } else {
-      await query(`UPDATE review_${userId}
-                   SET level = ${answer.level-1}
-                   WHERE word = '${answer.word}';`);
-      event.reply(`Wrong.. \uDBC0\uDC7D\nIt should be "${answer.annotation}"\nNext word: ${nextWord}`);
+      event.reply(replyMsg+`\nNext word: ${nextWord}`);
     }
   } catch (e) {
     replyErrorMsg(e, event);

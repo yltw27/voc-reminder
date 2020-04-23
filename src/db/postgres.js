@@ -1,5 +1,8 @@
 const {Pool} = require('pg');
-const cache = require('./cache');
+// const cache = require('./cache');
+
+const redis_client = require('redis').createClient(process.env.REDIS_URL);
+const expire = 60 * 60 * 12;
 
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
@@ -25,38 +28,36 @@ const query = function(queryString) {
   });
 };
 
-const addUserStatus = function(userId) {
+const updateUserStatus = function(userId, status, event) {
   try {
     query(`INSERT INTO status (user_id, mode, pointer)
-         VALUES ('${userId}', 'normal', 1)
-         ON CONFLICT (user_id)
-         DO UPDATE SET mode = 'normal', pointer = 1, updated_at = NOW();`);
+           VALUES ('${userId}', '${status}', 1)
+           ON CONFLICT (user_id)
+           DO UPDATE SET mode = '${status}', pointer = 1, updated_at = NOW();`);
   } catch (e) {
     replyErrorMsg(e, event);
   }
 };
 
-const addWord = async function (userId, word, annotation, event) {
-  try {
-    // Check if daily created words > 15
-    let num = await query(`SELECT count(1) 
-                           FROM voc
-                           WHERE user_id = '${userId}'
-                           AND created_at > now() - interval '1 day';`);
-    num = parseInt(num.rows[0].count);
-    if (num >= 15) {
-      return event.reply(`You can only add 15 new words every 24 hours.`);
-    } else {
+const addWord = function (userId, word, annotation, event) {
+  // Check cache for userId_adding_count
+  redis_client.get(userId+'_adding_count', async (err, res) => {
+    if (err) {
+      replyErrorMsg(err, event);
+    }
+    // null: no words added in 12 hours
+    if (res === null || parseInt(res) < 15) {
       await query(`INSERT INTO voc (user_id, word, annotation) 
                    VALUES ('${userId}', '${word}', '${annotation}') 
                    ON CONFLICT (user_id, word) 
                    DO UPDATE SET annotation = '${annotation}', updated_at = NOW();`);
-      event.reply(`${word} (${annotation}) is saved.`);
       query(`UPDATE status SET total = total + 1 WHERE user_id = '${userId}';`);
+      redis_client.setex(userId+'_adding_count', expire, parseInt(res)+1);
+      event.reply(`${word} (${annotation}) is saved.`);
+    } else {
+      return event.reply('You can only add 15 new words every 12 hours.');
     }
-  } catch (e) {
-    replyErrorMsg(e, event);
-  }
+  });
 };
 
 const updateWord = async function(userId, word, annotation, event) {
@@ -339,5 +340,5 @@ module.exports = {
   startReviewMode,
   isReviewMode,
   checkAnswer,
-  addUserStatus
+  updateUserStatus
 };

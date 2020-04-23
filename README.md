@@ -16,20 +16,25 @@ Build up a Line ChatBot to let users create vocabulary list and review it based 
   * bot.listen: join -> insert into status table [done]
 
 * Use caching
-  * local redis -> line 321
-  * Heroku redis
+  * local redis [done]
+  * Create src/db/postgres-cache.js and postgres-no-cache.js -> deploy on Heroku
 
 * issues
   * #end but status != review [done]
-  * Check review score calculation
+  * Check review score calculation [done]
   * review mode + only 1 word in list
 
-* Limit the number of show?
-* Custom review limit?
+* Limit the number of show -> 25 [done]
 * default word list and import/export
 * Test Cases (Mocha)
-
+* Change project name?
 * How-to blog
+
+* Copy this project to make a Bible version
+  * Verse of the day
+  * add verse by abbr with tags
+  * random pick
+  * Bilingual
 
 * LineBot Rich Menu [done]
   * Welcome message
@@ -80,8 +85,8 @@ Build up a Line ChatBot to let users create vocabulary list and review it based 
 3. Start redis `redis-server` (Run redis CLI from a different terminal `redis-cli`)
 
        // redic cli
-       // get data saved with id
-       get id
+       get key
+       set key value
 
 4. `npm run dev`
 5. Test your change via Line account
@@ -109,3 +114,4 @@ Build up a Line ChatBot to let users create vocabulary list and review it based 
 ### Caching (Redis)
 
 * [Learn to Cache your NodeJS Application with Redis in 6 Minutes!](https://itnext.io/learn-to-cache-your-nodejs-application-with-redis-in-6-minutes-745a574a9739)
+* [Heroku Redis](https://devcenter.heroku.com/articles/heroku-redis#connecting-in-node-js)

@@ -12,8 +12,12 @@ const bot = linebot({
   verify: false
 });
 
-bot.on('follow', async function(event) {
-  db.addUserStatus(event.source.userId);
+bot.on('follow', function(event) {
+  db.updateUserStatus(event.source.userId, 'normal', event);
+});
+
+bot.on('unfollow', function(event) {
+  db.updateUserStatus(event.source.userId, 'block', event);
 });
 
 bot.on('message', async function(event) {
@@ -26,27 +30,27 @@ bot.on('message', async function(event) {
   }
 
   // Check if the user is in 'review' mode
-  const review = await db.isReviewMode(userId, cleanUserMsg, event);
-  if (review === true) {
-    if (cleanUserMsg !== '#end') {
-      db.checkAnswer(userId, userMsg, event);
-    } 
-    return;
-  }
-
-  if (cleanUserMsg === 'review') {
-    db.startReviewMode(userId, event);
-  } else if (cleanUserMsg === 'show') {
-    db.showWords(userId, event);
-  } else if (userMsg.includes('//')) {
-    db.deleteWord(userId, userMsg.split('//')[1].trim(), event);
-  } else if (userMsg.includes('+')) {
-    const pair = userMsg.replace('+', '').split('/');
-    db.addWord(userId, pair[0].trim(), pair[1].trim(), event);
-  } else {
-    const pair = userMsg.split('/');
-    db.updateWord(userId, pair[0].trim(), pair[1].trim(), event);
-  }
+  await db.isReviewMode(userId, cleanUserMsg, event, (reviewing) => {
+    if (reviewing === true) {
+      return;
+    } else {
+      if (cleanUserMsg === '#end') {
+        event.reply('You are not in review mode.');
+      } else if (cleanUserMsg === 'review') {
+        db.startReviewMode(userId, event);
+      } else if (cleanUserMsg === 'show') {
+        db.showWords(userId, event);
+      } else if (userMsg.includes('//')) {
+        db.deleteWord(userId, userMsg.split('//')[1].trim(), event);
+      } else if (userMsg.includes('+')) {
+        const pair = userMsg.replace('+', '').split('/');
+        db.addWord(userId, pair[0].trim(), pair[1].trim(), event);
+      } else {
+        const pair = userMsg.split('/');
+        db.updateWord(userId, pair[0].trim(), pair[1].trim(), event);
+      }
+    }
+  });
 });
 
 const app = express();

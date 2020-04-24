@@ -215,7 +215,7 @@ const checkAnswer = async function(userId, userMsg, event) {
 const endReviewMode = async function(userId, replyMsg, event) {
   try {
     let pointer = await query(`SELECT pointer FROM status WHERE user_id = '${userId}';`);
-    pointer = parseInt(pointer.rows[0].pointer)-1;
+    pointer = parseInt(pointer.rows[0].pointer);
     const res = await query(`SELECT sum(correct), count(correct) FROM review_${userId};`);
     const score = Math.round(parseInt(res.rows[0].sum) / pointer * 100);
     let scoreMsg = `Turn off review mode.\nYou got ${score} % right this time! `;

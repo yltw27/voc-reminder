@@ -7,6 +7,9 @@ Build up a Line ChatBot to let users create vocabulary list and review it based 
 * Logo [done]
 * PostgreSQL - CRUD [done]
 * Cache [done]
+* License [done]
+* Issue
+  * no word in list but start review mode
 * Test Cases (Mocha)
 * How-to blog
 * Deploy on AWS/GCP
@@ -82,6 +85,10 @@ Build up a Line ChatBot to let users create vocabulary list and review it based 
 4. `npm run dev`
 5. Test your change via Line account
 
+## Mocha
+
+* Install **mocha** and **should** (assertion library)
+
 ## References
 
 ### Line ChatBot
@@ -106,6 +113,13 @@ Build up a Line ChatBot to let users create vocabulary list and review it based 
 * [Learn to Cache your NodeJS Application with Redis in 6 Minutes!](https://itnext.io/learn-to-cache-your-nodejs-application-with-redis-in-6-minutes-745a574a9739)
 * [Heroku Redis](https://devcenter.heroku.com/articles/heroku-redis#connecting-in-node-js)
 
+### Mocha
+
+* [Mocha official guide](https://mochajs.org/)
+
+* [[Node.js] 用 mocha 做單元測試](https://medium.com/cubemail88/node-js-%E7%94%A8-mocha-%E5%81%9A%E5%96%AE%E5%85%83%E6%B8%AC%E8%A9%A6-16dd9125e632)
+
 ### Others
 
 * [How to make a setTimeout function continuously loop?](https://stackoverflow.com/questions/17126758/how-to-make-a-settimeout-function-continuously-loop)
+* [詳述 GitHub 中聲明 LICENSE 的方法](https://blog.csdn.net/qq_35246620/article/details/77647234)

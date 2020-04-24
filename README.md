@@ -8,7 +8,6 @@ Build up a Line ChatBot to let users create vocabulary list and review it based 
 * PostgreSQL - CRUD [done]
 * Cache [done]
 * Test Cases (Mocha)
-* Change project name?
 * How-to blog
 * Deploy on AWS/GCP
 * Comment out query log
@@ -94,7 +93,6 @@ Build up a Line ChatBot to let users create vocabulary list and review it based 
 
 * To solve self certificate problem, uninstall pq module and reinstall it with `npm install pq@7`
 * [Problem: Couldn't connect to local server](https://stackoverflow.com/questions/13573204/psql-could-not-connect-to-server-no-such-file-or-directory-mac-os-x)
-
 * [Setting up a RESTful API with Node.js and PostgreSQL](https://blog.logrocket.com/setting-up-a-restful-api-with-node-js-and-postgresql-d96d6fc892d8/)
 * [Heroku: Provision a database](https://devcenter.heroku.com/articles/getting-started-with-nodejs#provision-a-database)
 * [node-postgres](https://node-postgres.com/)
@@ -107,3 +105,7 @@ Build up a Line ChatBot to let users create vocabulary list and review it based 
 
 * [Learn to Cache your NodeJS Application with Redis in 6 Minutes!](https://itnext.io/learn-to-cache-your-nodejs-application-with-redis-in-6-minutes-745a574a9739)
 * [Heroku Redis](https://devcenter.heroku.com/articles/heroku-redis#connecting-in-node-js)
+
+### Others
+
+* [How to make a setTimeout function continuously loop?](https://stackoverflow.com/questions/17126758/how-to-make-a-settimeout-function-continuously-loop)

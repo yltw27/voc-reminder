@@ -25,6 +25,17 @@ const query = function(queryString) {
   });
 };
 
+const getUsers = async function() {
+  try {
+    // skip block, review modes
+    const userIds = await query(`SELECT user_id FROM status WHERE mode = 'normal';`);
+    return userIds;
+  } catch (e) {
+    console.log(e);
+    return [];
+  }
+};
+
 const updateUserStatus = function(userId, status, event) {
   try {
     query(`INSERT INTO status (user_id, mode, pointer)
@@ -261,5 +272,6 @@ module.exports = {
   startReviewMode,
   isReviewMode,
   checkAnswer,
-  updateUserStatus
+  updateUserStatus,
+  getUsers
 };

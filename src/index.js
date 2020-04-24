@@ -72,6 +72,25 @@ bot.on('message', async function(event) {
   });
 });
 
+async function reminder() {
+  try {
+    const users = await db.getUsers();
+    for (user of users) {
+      const profile = await bot.getUserProfile(user.user_id);
+      bot.push(user.user_id, `Hey ${profile.displayName}~ Let's review words together \uDBC0\uDC8F`);
+    }
+  } catch (e) {
+    console.log(e);
+  }
+};
+
+function dailyReminder() {
+  reminder();
+  setTimeout(function() {
+    dailyReminder();
+  }, 60 * 60 * 24);
+};
+
 const app = express();
 
 // body parser middleware
@@ -84,4 +103,5 @@ app.post('/webhook', linebotParser);
 
 app.listen(port, function() {
   console.log('Server is up! Listening on port: ', port);
+  dailyReminder();
 });

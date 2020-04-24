@@ -28,7 +28,7 @@ const getUsers = async function() {
   try {
     // skip block, review modes
     const userIds = await query(`SELECT user_id FROM status WHERE mode = 'normal';`);
-    return userIds;
+    return userIds.rows;
   } catch (e) {
     console.log(e);
     return [];

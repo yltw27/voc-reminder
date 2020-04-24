@@ -4,12 +4,12 @@ const bodyParser = require('body-parser');
 
 // use postgres-cache for local env
 let db;
-if (process.env.ENV === 'heroku') {
-  db = require('./db/postgres');
-  console.log('Not use Redis cache!');
-} else {
+if (process.env.ENV === 'local') {
   db = require('./db/postgres-cache');
   console.log('Use Redis cache!');
+} else {
+  db = require('./db/postgres');
+  console.log('Not use Redis cache!');
 }
 
 const port = process.env.PORT;
@@ -29,7 +29,19 @@ bot.on('unfollow', function(event) {
   db.updateUserStatus(event.source.userId, 'block', event);
 });
 
+const stickers = [52002734, 52002735, 52002736, 52002738, 52002739,
+                  52002741, 52002748, 52002752, 52002768];
+
 bot.on('message', async function(event) {
+  // If user sends something other than text, reply a random sticker
+  if (event.message.type !== 'text') {
+    return event.reply({
+      type: 'sticker',
+      packageId: 11537,
+      stickerId: stickers[Math.floor(Math.random()*9)]
+    });
+  }
+
   const userMsg = event.message.text;
   const cleanUserMsg = userMsg.toLowerCase().trim();
   const userId = event.source.userId;

@@ -25,12 +25,12 @@ const query = function(queryString) {
   });
 };
 
-const addUserStatus = function(userId) {
+const updateUserStatus = function(userId, status, event) {
   try {
     query(`INSERT INTO status (user_id, mode, pointer)
-         VALUES ('${userId}', 'normal', 1)
-         ON CONFLICT (user_id)
-         DO UPDATE SET mode = 'normal', pointer = 1, updated_at = NOW();`);
+           VALUES ('${userId}', '${status}', 1)
+           ON CONFLICT (user_id)
+           DO UPDATE SET mode = '${status}', pointer = 1, updated_at = NOW();`);
   } catch (e) {
     replyErrorMsg(e, event);
   }
@@ -261,5 +261,5 @@ module.exports = {
   startReviewMode,
   isReviewMode,
   checkAnswer,
-  addUserStatus
+  updateUserStatus
 };

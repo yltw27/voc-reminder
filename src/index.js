@@ -1,7 +1,16 @@
 const linebot = require('linebot');
 const express = require('express');
 const bodyParser = require('body-parser');
-const db = require('./db/postgres');
+
+// use postgres-cache for local env
+let db;
+if (process.env.ENV === 'heroku') {
+  db = require('./db/postgres');
+  console.log('Not use Redis cache!');
+} else {
+  db = require('./db/postgres-cache');
+  console.log('Use Redis cache!');
+}
 
 const port = process.env.PORT;
 
@@ -31,9 +40,7 @@ bot.on('message', async function(event) {
 
   // Check if the user is in 'review' mode
   await db.isReviewMode(userId, cleanUserMsg, event, (reviewing) => {
-    if (reviewing === true) {
-      return;
-    } else {
+    if (reviewing === false) {
       if (cleanUserMsg === '#end') {
         event.reply('You are not in review mode.');
       } else if (cleanUserMsg === 'review') {

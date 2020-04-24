@@ -5,7 +5,7 @@ Build up a Line ChatBot to let users create vocabulary list and review it based 
 ## TODOs
 
 * Logo [done]
-* PostgreSQL - CRUD
+* PostgreSQL - CRUD [done]
   * save words: + word/annotation [done]
   * Show voc list: show [done]
   * Delete words: //word [done]
@@ -22,19 +22,14 @@ Build up a Line ChatBot to let users create vocabulary list and review it based 
 * issues
   * #end but status != review [done]
   * Check review score calculation [done]
-  * review mode + only 1 word in list
 
 * Limit the number of show -> 25 [done]
 * default word list and import/export
 * Test Cases (Mocha)
 * Change project name?
 * How-to blog
-
-* Copy this project to make a Bible version
-  * Verse of the day
-  * add verse by abbr with tags
-  * random pick
-  * Bilingual
+* Deploy on AWS/GCP
+* Comment out query log
 
 * LineBot Rich Menu [done]
   * Welcome message
@@ -52,6 +47,17 @@ Build up a Line ChatBot to let users create vocabulary list and review it based 
 
         - You can choose any language for words and definitions.
         - Happy Learning!
+
+## config/dev.env
+
+    // Below variables are needed
+    ENV=(local or heroku)
+    PORT=...
+    REDIS_URL=(local redis port)
+    LINE_CHANNEL_ID=...
+    LINE_CHANNEL_SECRET=...
+    LINE_CHANNEL_ACCESS_TOKEN=...
+    DATABASE_URL=postgres://...
 
 ## PostgreSQL
 

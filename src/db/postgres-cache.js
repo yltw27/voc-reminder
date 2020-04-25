@@ -52,13 +52,14 @@ const updateUserStatus = function(userId, status, event) {
 };
 
 const addWord = function (userId, word, annotation, event) {
+  const dailyLimit = 30;
   // Check cache for userId_adding_count
   redisClient.get(userId+'_adding_count', async (err, res) => {
     if (err) {
       replyErrorMsg(err, event);
     }
     // null: no words added in 12 hours
-    if (res === null || parseInt(res) < 15) {
+    if (res === null || parseInt(res) < dailyLimit) {
       await query(`INSERT INTO voc (user_id, word, annotation) 
                    VALUES ('${userId}', '${word}', '${annotation}') 
                    ON CONFLICT (user_id, word) 
@@ -67,7 +68,7 @@ const addWord = function (userId, word, annotation, event) {
       redisClient.setex(userId+'_adding_count', expire, parseInt(res)+1);
       event.reply(`${word} (${annotation}) is saved.`);
     } else {
-      return event.reply('You can only add 15 new words every 12 hours.');
+      return event.reply(`You can only add ${dailyLimit} new words every 12 hours.`);
     }
   });
 };

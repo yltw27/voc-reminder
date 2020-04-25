@@ -47,15 +47,16 @@ const updateUserStatus = function(userId, status, event) {
 };
 
 const addWord = async function (userId, word, annotation, event) {
+  const dailyLimit = 30;
   try {
-    // Check if daily created words > 15
+    // Check if daily created words > dailyLimit
     let num = await query(`SELECT count(1) 
                            FROM voc
                            WHERE user_id = '${userId}'
                            AND created_at > now() - interval '1 day';`);
     num = parseInt(num.rows[0].count);
-    if (num >= 15) {
-      return event.reply(`You can only add 15 new words every 24 hours.`);
+    if (num >= dailyLimit) {
+      return event.reply(`You can only add ${dailyLimit} new words every 24 hours.`);
     } else {
       await query(`INSERT INTO voc (user_id, word, annotation) 
                    VALUES ('${userId}', '${word}', '${annotation}') 

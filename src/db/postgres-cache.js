@@ -1,5 +1,4 @@
 const {Pool} = require('pg');
-// const cache = require('./cache');
 
 const redisClient = require('redis').createClient(process.env.REDIS_URL);
 const expire = 60 * 60 * 12;
@@ -138,7 +137,7 @@ const isReviewMode = async function (userId, userMsg, event, callback) {
     if (res === null) {
       res = await query(`SELECT mode FROM status WHERE user_id = '${userId}';`);
       res = res.rows[0].mode;
-      redisClient.set(userId+'_mode', res);
+      redisClient.setex(userId+'_mode', expire, res);
     }
 
     if (res === 'review') {

@@ -97,10 +97,6 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({extended: true}));
 
 app.post('/webhook', linebotParser);
-// app.post('/webhook', (req, res) => {
-//   bot.parse(req.body);
-//   return res.json({});
-// });
 
 module.exports = {
   app,

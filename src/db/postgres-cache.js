@@ -155,6 +155,12 @@ const isReviewMode = async function (userId, userMsg, event, callback) {
 
 const startReviewMode = async function (userId, event) {
   try {
+    // Check there's at least 1 word in user's list
+    const count = await query(`SELECT * FROM voc WHERE user_id = '${userId}'`);
+    if (count.rows.length === 0) {
+      return event.reply('There isn\'t any word saved in your list.');
+    }
+
     // update the status to review in database and cache
     query(`UPDATE status SET mode = 'review' WHERE user_id = '${userId}';`);
     redisClient.setex(userId+'_mode', expire, 'review');

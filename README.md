@@ -1,6 +1,6 @@
 # Voc Reminder
 
-Build up a Line ChatBot to let users create vocabulary list and review it based on spaced repetition.
+Build a Line ChatBot to let users save and review vocabularies.
 
 ## TODOs
 
@@ -8,32 +8,11 @@ Build up a Line ChatBot to let users create vocabulary list and review it based 
 * PostgreSQL - CRUD [done]
 * Cache [done]
 * License [done]
-* Issue
-  * no word in list but start review mode
-* Test Cases (Mocha)
-* How-to blog
-* Deploy on AWS/GCP
-* Comment out query log
-
 * LineBot Rich Menu [done]
-  * Welcome message
-
-        Hello, {Nickname}！
-        Thank you for adding {AccountName} :)
-
-        [How to Use {AccoungName}]
-        Add a new word:  + word/definition
-        Update a word:   word/new definition
-        Delete a word:   //word
-        Review mode:     review
-        End review mode: #end
-        Show all words:  show
-
-        - You can choose any language for words and definitions.
-        - Happy Learning!
-
-### New Features
-
+* Deploy on Heroku [done]
+* Deploy on AWS
+* Test Cases (Mocha)
+* How-to
 * default word list and import/export
 
 ## config/dev.env
@@ -84,10 +63,6 @@ Build up a Line ChatBot to let users create vocabulary list and review it based 
 
 4. `npm run dev`
 5. Test your change via Line account
-
-## Mocha
-
-* Install **mocha** and **should** (assertion library)
 
 ## References
 
